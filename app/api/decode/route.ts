@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDemoResult } from "@/data/demo";
-import { decodeLetter } from "@/lib/gemini";
+import { DecodeError, decodeLetter } from "@/lib/gemini";
 import { decodeRequestSchema } from "@/lib/schema";
 
 export const runtime = "nodejs";
@@ -35,8 +35,10 @@ export async function POST(request: Request) {
     return NextResponse.json(result);
   } catch (err) {
     console.error("decode failed", err);
-    const message = String(err);
-    const status = /429|RESOURCE_EXHAUSTED/.test(message) ? 429 : 502;
-    return NextResponse.json({ error: status === 429 ? "rate_limited" : "decode_failed" }, { status });
+    const code = err instanceof DecodeError ? err.code : "gemini_error";
+    const status = code === "rate_limited" ? 429 : code === "bad_output" ? 502 : 500;
+    // The raw reason helps while building locally; production only gets the code.
+    const detail = process.env.NODE_ENV !== "production" && err instanceof Error ? err.message : undefined;
+    return NextResponse.json({ error: code, detail }, { status });
   }
 }

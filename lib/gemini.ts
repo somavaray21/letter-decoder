@@ -3,15 +3,30 @@ import { z } from "zod";
 import { decodeResultSchema } from "./schema";
 import type { DecodeResult, Language } from "./types";
 
-// Override with GEMINI_MODEL if Google ships a newer Flash model.
-const DEFAULT_MODEL = "gemini-2.5-flash";
+// "gemini-flash-latest" always points at Google's current Flash model. Override with GEMINI_MODEL.
+const DEFAULT_MODEL = "gemini-flash-latest";
 
 const LANGUAGE_NAMES: Record<Language, string> = {
   en: "English",
   es: "Spanish",
 };
 
-const responseJsonSchema = z.toJSONSchema(decodeResultSchema);
+// Plain JSON schema for Gemini's JSON mode. Gemini only supports a subset of JSON Schema,
+// so drop the keywords zod adds that it may reject; zod still enforces them after parsing.
+function toGeminiSchema(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(toGeminiSchema);
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [key, v] of Object.entries(value)) {
+      if (key === "$schema" || key === "additionalProperties" || key === "pattern") continue;
+      out[key] = toGeminiSchema(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+const responseJsonSchema = toGeminiSchema(z.toJSONSchema(decodeResultSchema));
 
 function buildPrompt(language: Language, today: string): string {
   const languageName = LANGUAGE_NAMES[language];
@@ -34,7 +49,27 @@ Rules:
 - If the image is not a letter, set letterType "other", confidence "low", and say so in the summary.`;
 }
 
-export class DecodeError extends Error {}
+export type DecodeErrorCode = "missing_key" | "invalid_key" | "rate_limited" | "bad_model" | "bad_output" | "gemini_error";
+
+export class DecodeError extends Error {
+  constructor(
+    public code: DecodeErrorCode,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+function classify(err: unknown): DecodeError {
+  if (err instanceof DecodeError) return err;
+  const message = err instanceof Error ? err.message : String(err);
+  if (/API key not valid|API_KEY_INVALID|PERMISSION_DENIED|401|403/i.test(message)) {
+    return new DecodeError("invalid_key", message);
+  }
+  if (/429|RESOURCE_EXHAUSTED|quota/i.test(message)) return new DecodeError("rate_limited", message);
+  if (/404|NOT_FOUND|is not found|not supported/i.test(message)) return new DecodeError("bad_model", message);
+  return new DecodeError("gemini_error", message);
+}
 
 export async function decodeLetter(
   image: string,
@@ -42,7 +77,7 @@ export async function decodeLetter(
   language: Language,
 ): Promise<DecodeResult> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new DecodeError("GEMINI_API_KEY is not set");
+  if (!apiKey) throw new DecodeError("missing_key", "GEMINI_API_KEY is not set in .env.local");
 
   const ai = new GoogleGenAI({ apiKey });
   const today = new Date().toISOString().slice(0, 10);
@@ -51,23 +86,28 @@ export async function decodeLetter(
   let lastError: unknown;
   // One try plus one retry if the JSON comes back malformed.
   for (let attempt = 0; attempt < 2; attempt++) {
-    const response = await ai.models.generateContent({
-      model,
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { inlineData: { data: image, mimeType } },
-            { text: buildPrompt(language, today) },
-          ],
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model,
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { inlineData: { data: image, mimeType } },
+              { text: buildPrompt(language, today) },
+            ],
+          },
+        ],
+        config: {
+          responseMimeType: "application/json",
+          responseJsonSchema,
+          temperature: 0.2,
         },
-      ],
-      config: {
-        responseMimeType: "application/json",
-        responseJsonSchema,
-        temperature: 0.2,
-      },
-    });
+      });
+    } catch (err) {
+      throw classify(err);
+    }
 
     try {
       const parsed = decodeResultSchema.parse(JSON.parse(response.text ?? ""));
@@ -76,5 +116,5 @@ export async function decodeLetter(
       lastError = err;
     }
   }
-  throw new DecodeError(`Gemini returned invalid JSON twice: ${String(lastError)}`);
+  throw new DecodeError("bad_output", `Gemini returned invalid JSON twice: ${String(lastError)}`);
 }

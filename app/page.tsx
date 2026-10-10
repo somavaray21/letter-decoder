@@ -9,7 +9,7 @@ import { resizeImage } from "@/lib/resizeImage";
 import type { DecodeRequest, DecodeResult, Language } from "@/lib/types";
 
 type Status = "idle" | "loading" | "done" | "error";
-type ErrorKind = "generic" | "rate_limited" | "image";
+type ErrorKind = "generic" | "rate_limited" | "image" | "missing_key" | "invalid_key";
 type PreparedImage = { base64: string; mimeType: string };
 
 export default function Home() {
@@ -18,6 +18,7 @@ export default function Home() {
   const [image, setImage] = useState<PreparedImage | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [errorKind, setErrorKind] = useState<ErrorKind>("generic");
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const [result, setResult] = useState<DecodeResult | null>(null);
   const [demoMode, setDemoMode] = useState(false);
   const [demoLetter, setDemoLetter] = useState<DemoLetter>("eviction");
@@ -63,6 +64,7 @@ export default function Home() {
   async function decode(lang: Language) {
     if (!image && !demoMode) return;
     setStatus("loading");
+    setErrorDetail(null);
     const body: DecodeRequest = {
       image: image?.base64 ?? "demo",
       mimeType: image?.mimeType ?? "image/jpeg",
@@ -76,7 +78,13 @@ export default function Home() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        setErrorKind(res.status === 429 ? "rate_limited" : "generic");
+        const data = (await res.json().catch(() => ({}))) as { error?: string; detail?: string };
+        const kind: ErrorKind =
+          data.error === "rate_limited" || data.error === "missing_key" || data.error === "invalid_key"
+            ? data.error
+            : "generic";
+        setErrorKind(kind);
+        setErrorDetail(data.detail ?? null);
         setStatus("error");
         return;
       }
@@ -84,6 +92,7 @@ export default function Home() {
       setStatus("done");
     } catch {
       setErrorKind("generic");
+      setErrorDetail(null);
       setStatus("error");
     }
   }
@@ -103,8 +112,14 @@ export default function Home() {
     setStatus("idle");
   }
 
-  const errorMessage =
-    errorKind === "rate_limited" ? t.errorRateLimited : errorKind === "image" ? t.errorImage : t.errorGeneric;
+  const errorMessages: Record<ErrorKind, string> = {
+    generic: t.errorGeneric,
+    rate_limited: t.errorRateLimited,
+    image: t.errorImage,
+    missing_key: t.errorMissingKey,
+    invalid_key: t.errorInvalidKey,
+  };
+  const errorMessage = errorMessages[errorKind];
   const canDecode = (image !== null || demoMode) && status !== "loading";
 
   return (
@@ -220,7 +235,8 @@ export default function Home() {
         {status === "error" && (
           <div role="alert" className="space-y-3 rounded-xl border-4 border-red-700 bg-red-50 p-5 text-xl">
             <p>{errorMessage}</p>
-            {errorKind !== "image" && (image || demoMode) && (
+            {errorDetail && <p className="break-words font-mono text-sm text-neutral-800">{errorDetail}</p>}
+            {(errorKind === "generic" || errorKind === "rate_limited") && (image || demoMode) && (
               <button type="button" onClick={() => decode(language)} className="btn bg-red-700 text-white hover:bg-red-800">
                 {t.tryAgain}
               </button>
