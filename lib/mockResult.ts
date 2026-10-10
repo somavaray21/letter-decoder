@@ -25,4 +25,6 @@ export const mockResult: DecodeResult = {
   confidence: "high",
   language: "en",
   zip: "08102",
+  fullText:
+    "Maple Street Apartments LLC\n\nNOTICE TO PAY RENT OR QUIT\n\nYou are required to pay the full amount of $1,450.00 or vacate the premises within fourteen (14) days.\n\nQuestions: call (856) 555-0142.",
 };

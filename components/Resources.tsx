@@ -10,6 +10,13 @@ function servesZip(resource: Resource, zip: string): boolean {
   return resource.zips.some((prefix) => zip.startsWith(prefix));
 }
 
+// Help for this kind of letter near this ZIP. Local, letter-specific help first; general help (like 211) last.
+export function matchResources(letterType: LetterType, zip: string): Resource[] {
+  return (resources as Resource[])
+    .filter((r) => (r.letterTypes.includes(letterType) || r.letterTypes.includes("all")) && servesZip(r, zip))
+    .sort((a, b) => Number(!a.zips?.length) - Number(!b.zips?.length) || Number(a.letterTypes.includes("all")) - Number(b.letterTypes.includes("all")));
+}
+
 export function Resources({
   letterType,
   zip,
@@ -21,10 +28,7 @@ export function Resources({
   language: Language;
   t: Strings;
 }) {
-  const matches = (resources as Resource[])
-    .filter((r) => (r.letterTypes.includes(letterType) || r.letterTypes.includes("all")) && servesZip(r, zip))
-    // Local, letter-specific help first; general help (like 211) last.
-    .sort((a, b) => Number(!a.zips?.length) - Number(!b.zips?.length) || Number(a.letterTypes.includes("all")) - Number(b.letterTypes.includes("all")));
+  const matches = matchResources(letterType, zip);
 
   if (matches.length === 0) return null;
 

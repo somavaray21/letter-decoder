@@ -24,6 +24,21 @@ function buildScript(result: DecodeResult, language: Language, t: Strings): stri
 }
 
 export function ReadAloudButton({ result, language, t }: { result: DecodeResult; language: Language; t: Strings }) {
+  return <SpeakButton text={buildScript(result, language, t)} language={language} t={t} />;
+}
+
+// Reads any text aloud. Starting one button stops whatever another button was reading.
+export function SpeakButton({
+  text,
+  language,
+  t,
+  variant = "primary",
+}: {
+  text: string;
+  language: Language;
+  t: Strings;
+  variant?: "primary" | "secondary";
+}) {
   const [supported, setSupported] = useState(true);
   const [speaking, setSpeaking] = useState(false);
 
@@ -46,7 +61,7 @@ export function ReadAloudButton({ result, language, t }: { result: DecodeResult;
       setSpeaking(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(buildScript(result, language, t));
+    const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language === "es" ? "es-US" : "en-US";
     const voice = pickVoice(language);
     if (voice) utterance.voice = voice;
@@ -59,7 +74,7 @@ export function ReadAloudButton({ result, language, t }: { result: DecodeResult;
   }
 
   return (
-    <button type="button" onClick={toggle} aria-pressed={speaking} className="btn btn-primary">
+    <button type="button" onClick={toggle} aria-pressed={speaking} className={`btn btn-${variant}`}>
       <Icon name={speaking ? "stop" : "speaker"} />
       <span className="flex-1">{speaking ? t.stopReading : t.readAloud}</span>
     </button>

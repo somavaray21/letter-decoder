@@ -55,7 +55,13 @@ export function ResultView({
             {t.from}: {result.sender}
           </p>
         )}
-        <ReadAloudButton result={result} language={language} t={t} />
+        <div className="flex flex-col gap-[12px] sm:flex-row">
+          <ReadAloudButton result={result} language={language} t={t} />
+          <button type="button" onClick={() => window.print()} className="btn btn-secondary">
+            <Icon name="download" />
+            <span className="flex-1">{t.savePdf}</span>
+          </button>
+        </div>
       </section>
 
       <section aria-labelledby="deadlines-title" className="card">
