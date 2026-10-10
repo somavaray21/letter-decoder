@@ -66,9 +66,9 @@ const translationJsonSchema = toGeminiSchema(z.toJSONSchema(translationSchema));
 function buildDecodePrompt(language: Language, today: string): string {
   const languageName = LANGUAGE_NAMES[language];
   return `You help people understand official letters (government benefits, medical bills, housing, school financial aid, health).
-Read the letter in the images and explain it to someone who may not read well and may be stressed.
+Read the letter in the attached photo or PDF and explain it to someone who may not read well and may be stressed.
 
-The images are the pages of ONE letter, in order. If there is more than one, read them all together as a single letter.
+Everything attached is ONE letter. If it has several pages, read them all, in order, as a single letter.
 
 Today's date is ${today}.
 
@@ -84,9 +84,9 @@ Rules:
 - "confidence": "low" if the image is blurry, cut off, not an official letter, or you are unsure about any deadline or amount. Otherwise "high".
 - "language": "${language}".
 - "zip": the 5-digit ZIP code from the recipient's mailing address (not the sender's), or "" if there is none.
-- "fullText": the whole letter transcribed word for word in its original language, page by page and top to bottom, keeping line breaks. Include names, addresses, phone numbers, dates and amounts exactly as printed. Do not summarize, fix or translate it. Use "" if the images are not a letter.
+- "fullText": the whole letter transcribed word for word in its original language, page by page and top to bottom, keeping line breaks. Include names, addresses, phone numbers, dates and amounts exactly as printed. Do not summarize, fix or translate it. Use "" if the attachment is not a letter.
 - Never invent phone numbers, amounts, dates, or names that are not in the letter.
-- If the images are not a letter, set letterType "other", confidence "low", and say so in the summary.`;
+- If the attachment is not a letter, set letterType "other", confidence "low", and say so in the summary.`;
 }
 
 function buildTranslatePrompt(language: Language, text: z.infer<typeof translationSchema>): string {

@@ -4,7 +4,37 @@ import type { ChatEntry } from "./LetterChat";
 import { matchResources, resourceDescription } from "./Resources";
 
 // One-column summary shown only when printing ("Save as PDF"). Hidden on screen.
+// With several documents, each one starts on a new page under a "Document 1 of 2" title.
 export function PrintSummary({
+  documents,
+  language,
+  t,
+}: {
+  documents: { result: DecodeResult; chat: ChatEntry[] }[];
+  language: Language;
+  t: Strings;
+}) {
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  return (
+    <article className="print-summary hidden print:block">
+      <header>
+        <h1>{t.printTitle}</h1>
+        <p>{t.printDate(formatDate(today, language))}</p>
+      </header>
+      {documents.map(({ result, chat }, i) => (
+        <div key={i} className={i > 0 ? "doc-break" : undefined}>
+          {documents.length > 1 && <h2 className="doc-title">{t.documentOf(i + 1, documents.length)}</h2>}
+          <DocumentSummary result={result} chat={chat} language={language} t={t} />
+        </div>
+      ))}
+      <footer>{t.printFooter}</footer>
+    </article>
+  );
+}
+
+function DocumentSummary({
   result,
   chat,
   language,
@@ -15,16 +45,10 @@ export function PrintSummary({
   language: Language;
   t: Strings;
 }) {
-  const now = new Date();
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const helpers = matchResources(result.letterType, result.zip);
 
   return (
-    <article className="print-summary hidden print:block">
-      <header>
-        <h1>{t.printTitle}</h1>
-        <p>{t.printDate(formatDate(today, language))}</p>
-      </header>
+    <>
 
       <section>
         {result.sender && (
@@ -123,7 +147,6 @@ export function PrintSummary({
         </section>
       )}
 
-      <footer>{t.printFooter}</footer>
-    </article>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 # Letter Decoder
 
-Upload photos of a confusing official letter, one or several pages (Medicaid renewal, hospital bill, eviction notice, SNAP recertification, financial aid), and get a plain-language explanation: what it is, how urgent it is, the deadlines, 3–5 next steps, and who to call, including the phone numbers and emails printed in the letter. In English, Spanish, Mandarin, French, Hindi, Arabic (right to left), Tagalog and Russian, with read-aloud.
+Upload photos or PDFs of confusing official letters, one or several at once (Medicaid renewal, hospital bill, eviction notice, SNAP recertification, financial aid), and get a plain-language explanation: what it is, how urgent it is, the deadlines, 3–5 next steps, and who to call, including the phone numbers and emails printed in the letter. In English, Spanish, Mandarin, French, Hindi, Arabic (right to left), Tagalog and Russian, with read-aloud.
 
 Next.js (App Router) + TypeScript + Tailwind, one API route, no database, no login. Nothing is stored.
 
@@ -26,8 +26,8 @@ Open `http://localhost:3000/?demo=1`. Pick the sample letter from the dropdown a
 
 ## How it works
 
-1. `app/page.tsx` shrinks each page photo to ~1500px wide in the browser (smaller if a long letter would pass 4 MB, which keeps it under Vercel's request limit) and POSTs all pages, in order, with the language to `/api/decode`. The photos stay in page state so they can be opened again on the results page; they are never saved.
-2. `app/api/decode/route.ts` validates the request and calls `lib/gemini.ts`, which sends the pages to Gemini Flash-Lite in one request in JSON mode with the `DecodeResult` schema and validates the answer with zod. If Flash-Lite is busy or returns bad JSON, it falls back to Gemini Flash. Letters are always read in English first; every other language is a second, text-only translation call, which keeps accents and scripts right.
+1. `app/page.tsx` treats each uploaded file as its own document: a photo is shrunk to ~1500px wide, a PDF is sent as it is (up to about 3 MB, so it stays under Vercel's request limit), and a multi-page PDF stays one document. Every document is POSTed to `/api/decode` separately, at the same time, and the results page shows one "Document 1 of 2" section per document with its own explanation, file, contacts and chat. The files stay in page state so they can be opened again on the results page; they are never saved.
+2. `app/api/decode/route.ts` validates the request and calls `lib/gemini.ts`, which sends the photo or PDF to Gemini Flash-Lite in JSON mode with the `DecodeResult` schema and validates the answer with zod. If Flash-Lite is busy or returns bad JSON, it falls back to Gemini Flash. Letters are always read in English first; every other language is a second, text-only translation call, which keeps accents and scripts right.
    Switching language on the results page calls `app/api/translate/route.ts`, which translates the existing result without sending the photo again (under a second).
 3. The screens follow the Figma design (light and dark, Normal and Large text). `components/ResultView.tsx` shows the summary, urgency badge, deadlines (with the quoted line from the letter and an "Add to calendar" .ics download), numbered steps, and "Who can help": the phone numbers (tap to call) and emails (tap to write) found in the letter, then matching local help from `data/resources.json`. Arabic flips the page to right to left.
 4. Read-aloud uses the browser's `speechSynthesis`, picking a voice for the chosen language when the device has one.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { MAX_HISTORY_TURNS, MAX_QUESTION_LENGTH } from "@/lib/schema";
 import type { Strings } from "@/lib/i18n";
 import type { AskRequest, AskResponse, Language } from "@/lib/types";
@@ -17,13 +17,17 @@ export function LetterChat({
   onAnswer,
   language,
   t,
+  nested = false,
 }: {
   fullText: string;
   entries: ChatEntry[];
   onAnswer: (entry: ChatEntry) => void;
   language: Language;
   t: Strings;
+  nested?: boolean; // inside a "Document 1" section, so the heading is h3
 }) {
+  const id = useId();
+  const H = nested ? "h3" : "h2";
   const [draft, setDraft] = useState("");
   const [asking, setAsking] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -67,10 +71,10 @@ export function LetterChat({
   }
 
   return (
-    <section aria-labelledby="chat-title" className="card">
-      <h2 id="chat-title" className="heading">
+    <section aria-labelledby={`${id}-title`} className="card">
+      <H id={`${id}-title`} className="heading">
         {t.chatTitle}
-      </h2>
+      </H>
       <p className="text-muted">{t.chatIntro}</p>
 
       {(entries.length > 0 || asking) && (
@@ -137,11 +141,11 @@ export function LetterChat({
         }}
         className="flex flex-col gap-[12px]"
       >
-        <label htmlFor="chat-question" className="font-bold">
+        <label htmlFor={`${id}-question`} className="font-bold">
           {t.questionLabel}
         </label>
         <input
-          id="chat-question"
+          id={`${id}-question`}
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}

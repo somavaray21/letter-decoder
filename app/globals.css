@@ -202,6 +202,15 @@ h3,
     list-style: decimal;
     padding-inline-start: 18pt;
   }
+  .print-summary .doc-break {
+    break-before: page;
+  }
+  .print-summary .doc-title {
+    font-size: 17pt;
+    margin-bottom: 10pt;
+    padding-bottom: 4pt;
+    border-bottom: 2px solid #000000;
+  }
   .print-summary .quote {
     font-size: 10.5pt;
     font-style: italic;

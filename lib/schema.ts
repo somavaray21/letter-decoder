@@ -40,7 +40,7 @@ export const decodeResultSchema = z.object({
 
 // ~6 MB of base64 is far more than a 1500px JPEG needs.
 export const MAX_IMAGE_BASE64_LENGTH = 6_000_000;
-// The browser shrinks pages so a whole letter stays under this, which also fits Vercel's 4.5 MB request limit.
+// One document per request, kept under Vercel's 4.5 MB request limit. Photos are shrunk to fit; a larger PDF is refused in the browser.
 export const MAX_TOTAL_BASE64_LENGTH = 4_000_000;
 export const MAX_PAGES = 8;
 
@@ -49,7 +49,7 @@ export const decodeRequestSchema = z.object({
     .array(
       z.object({
         data: z.string().min(1).max(MAX_IMAGE_BASE64_LENGTH),
-        mimeType: z.string().regex(/^image\/[a-z0-9.+-]+$/i),
+        mimeType: z.string().regex(/^(image\/[a-z0-9.+-]+|application\/pdf)$/i),
       }),
     )
     .max(MAX_PAGES)
