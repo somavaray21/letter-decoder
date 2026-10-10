@@ -33,13 +33,14 @@ export type DecodeResult = {
   fullText: string; // the full letter text, transcribed
 };
 
+// A photo (shrunk to JPEG in the browser) or a PDF of one letter.
 export type LetterImage = {
   data: string; // base64, no data: prefix
-  mimeType: string;
+  mimeType: string; // "image/jpeg" or "application/pdf"
 };
 
 export type DecodeRequest = {
-  images: LetterImage[]; // the pages of one letter, in order; empty only in demo mode
+  images: LetterImage[]; // one document: a photo or a PDF (a PDF may hold several pages); empty only in demo mode
   language: Language;
   demo?: string; // demo letter key, only used with ?demo=1
 };

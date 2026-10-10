@@ -2,8 +2,24 @@ import { MAX_TOTAL_BASE64_LENGTH } from "./schema";
 import type { LetterImage } from "./types";
 
 const MAX_WIDTH = 1500;
-const MIN_WIDTH = 900;
 const JPEG_QUALITY = 0.85;
+
+export type DocumentKind = "image" | "pdf";
+
+export class PdfTooLargeError extends Error {}
+
+export function isPdf(file: File): boolean {
+  return file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+}
+
+// Turns one uploaded file into what /api/decode needs: a photo is shrunk to JPEG, a PDF is sent as it is.
+// Throws PdfTooLargeError for a PDF over the request limit, and an Error for a photo the browser can't open.
+export async function prepareDocument(file: File): Promise<{ kind: DocumentKind; payload: LetterImage }> {
+  if (!isPdf(file)) return { kind: "image", payload: await resizeImage(file) };
+  const data = await toBase64(file);
+  if (data.length > MAX_TOTAL_BASE64_LENGTH) throw new PdfTooLargeError("PDF too large");
+  return { kind: "pdf", payload: { data, mimeType: "application/pdf" } };
+}
 
 // Shrinks a photo to about 1500px wide and returns base64 JPEG (no data: prefix).
 export async function resizeImage(file: Blob, maxWidth = MAX_WIDTH): Promise<LetterImage> {
@@ -28,13 +44,13 @@ export async function resizeImage(file: Blob, maxWidth = MAX_WIDTH): Promise<Let
   }
 }
 
-// A long letter can be too big to send in one request. JPEG size grows with the image's area,
-// so shrink every page by the square root of how far over the limit the letter is, with some room to spare.
-export async function fitLetter(files: Blob[], pages: LetterImage[]): Promise<LetterImage[]> {
-  const total = pages.reduce((n, p) => n + p.data.length, 0);
-  if (total <= MAX_TOTAL_BASE64_LENGTH) return pages;
-  const width = Math.max(MIN_WIDTH, Math.floor(MAX_WIDTH * Math.sqrt((MAX_TOTAL_BASE64_LENGTH * 0.9) / total)));
-  return Promise.all(files.map((file) => resizeImage(file, width)));
+function toBase64(file: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.readAsDataURL(file);
+  });
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {

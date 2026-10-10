@@ -1,3 +1,4 @@
+import { useId } from "react";
 import resources from "@/data/resources.json";
 import type { Strings } from "@/lib/i18n";
 import type { Language, LetterContact, LetterType, Resource } from "@/lib/types";
@@ -70,31 +71,36 @@ export function Resources({
   contacts,
   language,
   t,
+  nested = false,
 }: {
   letterType: LetterType;
   zip: string;
   contacts: LetterContact[];
   language: Language;
   t: Strings;
+  nested?: boolean;
 }) {
   const matches = matchResources(letterType, zip);
+  const id = useId();
+  const H = nested ? "h3" : "h2";
+  const Sub = nested ? "h4" : "h3";
 
   if (matches.length === 0 && contacts.length === 0) return null;
 
   return (
-    <section aria-labelledby="who-to-call" className="card">
-      <h2 id="who-to-call" className="heading">
+    <section aria-labelledby={id} className="card">
+      <H id={id} className="heading">
         {t.whoToCall}
-      </h2>
+      </H>
       {contacts.length > 0 && (
         <>
-          <h3 className="text-[1.1111rem] font-bold">{t.fromYourLetter}</h3>
+          <Sub className="text-[1.1111rem] font-bold">{t.fromYourLetter}</Sub>
           <LetterContacts contacts={contacts} t={t} />
         </>
       )}
       {matches.length > 0 && (
         <>
-          {contacts.length > 0 && <h3 className="text-[1.1111rem] font-bold">{t.moreHelp}</h3>}
+          {contacts.length > 0 && <Sub className="text-[1.1111rem] font-bold">{t.moreHelp}</Sub>}
           {zip && <p className="text-muted">{t.helpNear(zip)}</p>}
           <ul className="flex flex-col gap-[24px]">
             {matches.map((r) => (

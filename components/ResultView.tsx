@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { downloadIcs } from "@/lib/calendar";
 import { formatDate, formatShortDate, type Strings } from "@/lib/i18n";
 import type { DecodeResult, Language } from "@/lib/types";
@@ -19,14 +20,18 @@ export function ResultView({
   isDemo,
   t,
   letterPages,
+  nested = false,
 }: {
   result: DecodeResult;
   language: Language;
   isDemo: boolean;
   t: Strings;
   letterPages?: React.ReactNode; // the letter's photos, shown after the summary
+  nested?: boolean; // inside a "Document 1" section, so section headings are h3
 }) {
   const urgency = URGENCY_STYLES[result.urgency];
+  const H = nested ? "h3" : "h2";
+  const id = useId();
 
   return (
     <div className="flex flex-col gap-[32px]">
@@ -39,7 +44,7 @@ export function ResultView({
 
       {isDemo && <p className="text-muted">{t.demoResultNote}</p>}
 
-      <section aria-labelledby="summary-title" className="card">
+      <section aria-labelledby={`${id}-summary`} className="card">
         <div className="flex flex-col items-start gap-[12px]">
           <p className={`inline-flex max-w-full items-center gap-[8px] rounded-full px-[12px] py-[8px] font-bold leading-[1.4] ${urgency.className}`}>
             <Icon name={urgency.icon} />
@@ -48,9 +53,9 @@ export function ResultView({
           </p>
           <p className="font-bold text-muted">{t.letterTypes[result.letterType]}</p>
         </div>
-        <h2 id="summary-title" tabIndex={-1} className="heading">
+        <H id={`${id}-summary`} tabIndex={-1} className="heading">
           {t.whatItIs}
-        </h2>
+        </H>
         <p>{result.summary}</p>
         {result.sender && (
           <p className="text-muted">
@@ -68,10 +73,10 @@ export function ResultView({
 
       {letterPages}
 
-      <section aria-labelledby="deadlines-title" className="card">
-        <h2 id="deadlines-title" className="heading">
+      <section aria-labelledby={`${id}-deadlines`} className="card">
+        <H id={`${id}-deadlines`} className="heading">
           {t.deadlines}
-        </h2>
+        </H>
         {result.deadlines.length === 0 ? (
           <p className="text-muted">{t.noDeadlines}</p>
         ) : (
@@ -115,10 +120,10 @@ export function ResultView({
         )}
       </section>
 
-      <section aria-labelledby="steps-title" className="card">
-        <h2 id="steps-title" className="heading">
+      <section aria-labelledby={`${id}-steps`} className="card">
+        <H id={`${id}-steps`} className="heading">
           {t.steps}
-        </h2>
+        </H>
         <ol className="flex flex-col gap-[24px]">
           {result.steps.map((step, i) => (
             <li key={i} className="flex items-start gap-[12px]">
@@ -135,7 +140,7 @@ export function ResultView({
         </ol>
       </section>
 
-      <Resources letterType={result.letterType} zip={result.zip} contacts={result.contacts} language={language} t={t} />
+      <Resources letterType={result.letterType} zip={result.zip} contacts={result.contacts} language={language} t={t} nested={nested} />
 
       <p className="text-muted">{t.disclaimer}</p>
     </div>
