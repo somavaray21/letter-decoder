@@ -1,0 +1,21 @@
+{
+  "letterType": "financial_aid",
+  "summary": "Your college needs more papers to finish your financial aid. Until you send them, you will not get your grant money for next term.",
+  "urgency": "medium",
+  "deadlines": [
+    {
+      "date": "2026-12-01",
+      "what": "Send the verification worksheet and tax transcript",
+      "sourceQuote": "Please submit the Verification Worksheet and an IRS Tax Return Transcript no later than December 1, 2026."
+    }
+  ],
+  "steps": [
+    "Log in to your student portal and download the verification worksheet.",
+    "Get your free tax return transcript from the IRS website.",
+    "Upload both papers to the financial aid office.",
+    "Ask the financial aid office to confirm they got them."
+  ],
+  "sender": "Lakeside Community College Office of Financial Aid",
+  "confidence": "high",
+  "language": "en"
+}

@@ -1,0 +1,22 @@
+{
+  "letterType": "medical_bill",
+  "summary": "El hospital dice que usted debe $2,380 por una visita a la sala de emergencias. Es posible que puedan bajar o perdonar esta cuenta con ayuda financiera.",
+  "urgency": "medium",
+  "deadlines": [
+    {
+      "date": "2026-11-09",
+      "what": "Pagar la cuenta o hacer un plan de pagos",
+      "sourceQuote": "Payment in full or a payment arrangement is due by November 9, 2026."
+    }
+  ],
+  "steps": [
+    "Revise la cuenta para ver si cobran algo que no recibió.",
+    "Pida al hospital una solicitud de ayuda financiera (caridad).",
+    "Pida una cuenta detallada con cada cargo.",
+    "Si no puede pagar todo, pida un plan de pagos sin interés.",
+    "No pague con tarjeta de crédito antes de pedir ayuda."
+  ],
+  "sender": "Riverside General Hospital Patient Billing",
+  "confidence": "high",
+  "language": "es"
+}

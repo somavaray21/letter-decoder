@@ -1,0 +1,22 @@
+{
+  "letterType": "eviction",
+  "summary": "Su arrendador dice que usted debe $1,450 de renta. Si no paga o no se muda en 14 días, puede ir a la corte para desalojarle.",
+  "urgency": "high",
+  "deadlines": [
+    {
+      "date": "2026-10-24",
+      "what": "Pagar la renta que debe o mudarse",
+      "sourceQuote": "You are required to pay the full amount of $1,450.00 or vacate the premises within fourteen (14) days of service of this notice."
+    }
+  ],
+  "steps": [
+    "No ignore esta carta. Usted todavía tiene derechos.",
+    "Llame hoy a una oficina de ayuda legal gratis.",
+    "Si puede pagar, pague todo y pida un recibo por escrito.",
+    "Si no puede pagar, pida ayuda de emergencia para la renta ahora mismo.",
+    "Guarde esta carta y todos los recibos en un lugar seguro."
+  ],
+  "sender": "Maple Street Apartments LLC",
+  "confidence": "high",
+  "language": "es"
+}

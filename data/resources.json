@@ -1,0 +1,12 @@
+[
+  {
+    "name": "211",
+    "phone": "211",
+    "url": "https://www.211.org",
+    "description": {
+      "en": "Free, confidential help finding local food, housing, health and legal services. Call or text 211, any time.",
+      "es": "Ayuda gratis y confidencial para encontrar comida, vivienda, salud y servicios legales cerca de usted. Llame o envíe un texto al 211, a cualquier hora."
+    },
+    "letterTypes": ["all"]
+  }
+]

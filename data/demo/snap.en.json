@@ -1,0 +1,27 @@
+{
+  "letterType": "snap",
+  "summary": "Your SNAP food benefits need to be recertified. You must have a phone interview and send proof of your income and rent, or your benefits will stop.",
+  "urgency": "high",
+  "deadlines": [
+    {
+      "date": "2026-10-28",
+      "what": "Phone interview with your caseworker at 10:00 AM",
+      "sourceQuote": "Your recertification interview is scheduled by telephone on October 28, 2026 at 10:00 AM."
+    },
+    {
+      "date": "2026-10-31",
+      "what": "Send proof of income and rent",
+      "sourceQuote": "Verification documents must be returned by October 31, 2026, or your benefits will end."
+    }
+  ],
+  "steps": [
+    "Put the interview date and time in your phone.",
+    "Make sure your phone is on and charged that morning.",
+    "Gather your pay stubs and your lease or rent receipt.",
+    "Send copies of these papers before the deadline.",
+    "If you miss the call, call your SNAP office the same day."
+  ],
+  "sender": "County Department of Social Services",
+  "confidence": "high",
+  "language": "en"
+}

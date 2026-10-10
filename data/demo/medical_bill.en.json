@@ -1,0 +1,22 @@
+{
+  "letterType": "medical_bill",
+  "summary": "The hospital says you owe $2,380 for an emergency room visit. You may be able to get this bill lowered or forgiven through financial assistance.",
+  "urgency": "medium",
+  "deadlines": [
+    {
+      "date": "2026-11-09",
+      "what": "Pay the bill or set up a payment plan",
+      "sourceQuote": "Payment in full or a payment arrangement is due by November 9, 2026."
+    }
+  ],
+  "steps": [
+    "Check the bill for services you did not get.",
+    "Ask the hospital for a financial assistance (charity care) application.",
+    "Ask for an itemized bill that lists every charge.",
+    "If you cannot pay all at once, ask for a payment plan with no interest.",
+    "Do not put this bill on a credit card before you ask for help."
+  ],
+  "sender": "Riverside General Hospital Patient Billing",
+  "confidence": "high",
+  "language": "en"
+}
