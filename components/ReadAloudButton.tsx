@@ -17,11 +17,28 @@ const SPEECH_LANG: Record<Language, string> = {
   ru: "ru-RU",
 };
 
+// Browsers don't say whether a voice is female, so this goes by name: the female voices that ship with
+// Apple, Windows, Android and Chrome for each language, plus any voice whose name says "female".
+const FEMALE_VOICE =
+  /\bfemale\b|samantha|ava|allison|susan|victoria|karen|moira|tessa|fiona|serena|kate|zira|aria|jenny|michelle|emma|sonia|libby|natasha|paulina|monica|mónica|marisol|helena|laura|elvira|dalia|paloma|sabina|ting-ting|tingting|mei-jia|meijia|sin-ji|xiaoxiao|xiaoyi|huihui|yaoyao|amélie|amelie|audrey|aurélie|aurelie|marie|denise|julie|hortense|brigitte|lekha|kalpana|swara|heera|neerja|zariyah|hoda|salma|laila|mariam|amina|blessica|milena|katya|irina|svetlana|dariya|ekaterina|google/i;
+const MALE_VOICE =
+  /\b(male|daniel|alex|fred|aaron|arthur|thomas|david|mark|guy|ryan|jorge|diego|pablo|juan|yunxi|yunyang|kangkang|henri|claude|nicolas|madhur|hemant|prabhat|naayf|hamed|shakir|angelo|pavel|dmitry|yuri|maxim)\b/i;
+// Natural, neural and premium voices sound much less robotic than the basic ones.
+const NATURAL_VOICE = /natural|neural|premium|enhanced|online|google/i;
+
+// Picks a pleasant female voice for the language when the device has one: female and natural first,
+// then any female voice, then any voice that isn't clearly male, then whatever the device has.
 function pickVoice(language: Language): SpeechSynthesisVoice | undefined {
   const voices = window.speechSynthesis.getVoices();
   const prefixes = language === "tl" ? ["fil", "tl"] : [SPEECH_LANG[language].split("-")[0]];
-  const matches = (v: SpeechSynthesisVoice) => prefixes.some((p) => v.lang.toLowerCase().replace("_", "-").startsWith(p));
-  return voices.find((v) => matches(v) && v.localService) ?? voices.find(matches);
+  const forLanguage = voices.filter((v) => prefixes.some((p) => v.lang.toLowerCase().replace("_", "-").startsWith(p)));
+  const female = forLanguage.filter((v) => FEMALE_VOICE.test(v.name) && !MALE_VOICE.test(v.name));
+  return (
+    female.find((v) => NATURAL_VOICE.test(v.name)) ??
+    female[0] ??
+    forLanguage.find((v) => !MALE_VOICE.test(v.name)) ??
+    forLanguage[0]
+  );
 }
 
 function buildScript(result: DecodeResult, language: Language, t: Strings): string {
@@ -76,7 +93,9 @@ export function SpeakButton({
     utterance.lang = SPEECH_LANG[language];
     const voice = pickVoice(language);
     if (voice) utterance.voice = voice;
+    // A little slower than normal and a touch higher, which sounds calm and warm with most voices.
     utterance.rate = 0.9;
+    utterance.pitch = 1.1;
     utterance.onend = () => setSpeaking(false);
     utterance.onerror = () => setSpeaking(false);
     synth.cancel();
