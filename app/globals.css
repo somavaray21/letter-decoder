@@ -142,3 +142,74 @@ h3,
     transition: none !important;
   }
 }
+
+/* "Save as PDF": print only the one-column summary (components/PrintSummary.tsx), black on white. */
+@media print {
+  @page {
+    margin: 16mm;
+  }
+  :root,
+  :root[data-theme="dark"],
+  :root[data-text-size="large"] {
+    --paper: #ffffff;
+    --card: #ffffff;
+    --ink: #000000;
+    --muted: #000000;
+    --line: #000000;
+    color-scheme: light;
+    font-size: 12pt;
+  }
+  body {
+    background: #ffffff;
+    color: #000000;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+  button,
+  input,
+  textarea,
+  select,
+  form,
+  [role="button"] {
+    display: none !important;
+  }
+  .print-summary h1 {
+    font-size: 20pt;
+    margin-bottom: 4pt;
+  }
+  .print-summary h2 {
+    font-size: 14pt;
+    margin-bottom: 6pt;
+  }
+  .print-summary header,
+  .print-summary section {
+    margin-bottom: 14pt;
+  }
+  .print-summary section,
+  .print-summary li {
+    break-inside: avoid;
+  }
+  .print-summary h2 {
+    break-after: avoid;
+  }
+  .print-summary ul,
+  .print-summary ol {
+    display: flex;
+    flex-direction: column;
+    gap: 8pt;
+  }
+  .print-summary ol {
+    list-style: decimal;
+    padding-left: 18pt;
+  }
+  .print-summary .quote {
+    font-size: 10.5pt;
+    font-style: italic;
+  }
+  .print-summary footer {
+    margin-top: 18pt;
+    padding-top: 8pt;
+    border-top: 1px solid #000000;
+    font-size: 10pt;
+  }
+}

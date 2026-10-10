@@ -20,6 +20,7 @@ export type DecodeResult = {
   confidence: "high" | "low"; // low = show "double-check this" banner
   language: string; // e.g. "en", "es"
   zip: string; // ZIP code from the recipient's address, or "" if not found
+  fullText: string; // the full letter text, transcribed
 };
 
 export type DecodeRequest = {
@@ -32,6 +33,24 @@ export type DecodeRequest = {
 export type TranslateRequest = {
   result: DecodeResult;
   language: Language;
+};
+
+export type ChatTurn = {
+  question: string;
+  answer: string;
+};
+
+export type AskRequest = {
+  fullText: string;
+  question: string;
+  history: ChatTurn[]; // earlier questions and answers, oldest first
+  language: Language;
+};
+
+export type AskResponse = {
+  answer: string;
+  sourceQuote: string | null; // exact line from the letter, or null if none
+  foundInLetter: boolean;
 };
 
 export type Resource = {

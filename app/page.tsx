@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { FlatLetterIllustration } from "@/components/Illustrations";
+import { LetterChat, type ChatEntry } from "@/components/LetterChat";
 import { DecodingCard, TranslatingView } from "@/components/Loading";
+import { PrintSummary } from "@/components/PrintSummary";
 import { ReadingPreferences } from "@/components/ReadingPreferences";
 import { ResultView } from "@/components/ResultView";
 import { DEMO_LETTERS, type DemoLetter } from "@/data/demo";
@@ -144,6 +146,8 @@ export default function Home() {
   const [pending, setPending] = useState<Pending | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [result, setResult] = useState<DecodeResult | null>(null);
+  // Letter chat questions and answers, kept only in page state for the chat and the printed summary.
+  const [chat, setChat] = useState<ChatEntry[]>([]);
   const [demoMode, setDemoMode] = useState(false);
   const [demoLetter, setDemoLetter] = useState<DemoLetter>("eviction");
   const main = useRef<HTMLElement>(null);
@@ -181,6 +185,7 @@ export default function Home() {
     event.target.value = "";
     if (!file) return;
     setResult(null);
+    setChat([]);
     setFailure(null);
     setPreviewUrl(URL.createObjectURL(file));
     try {
@@ -214,6 +219,7 @@ export default function Home() {
       fail(answer.error, answer.detail, "generic", () => decode(lang));
       return;
     }
+    setChat([]);
     setResult(answer);
   }
 
@@ -248,6 +254,7 @@ export default function Home() {
   function startOver() {
     window.speechSynthesis?.cancel();
     setResult(null);
+    setChat([]);
     setImage(null);
     setPreviewUrl(null);
     setFailure(null);
@@ -268,6 +275,15 @@ export default function Home() {
       <>
         {failure && <FailureCard failure={failure} t={t} onRetakePhoto={onFileChosen} />}
         <ResultView result={result} language={language} isDemo={demoMode} t={t} />
+        {result.fullText.trim() && (
+          <LetterChat
+            fullText={result.fullText}
+            entries={chat}
+            onAnswer={(entry) => setChat((prev) => [...prev, entry])}
+            language={language}
+            t={t}
+          />
+        )}
         <button type="button" onClick={startOver} className="btn btn-secondary">
           <Icon name="camera" />
           <span className="flex-1">{t.startOver}</span>
@@ -358,12 +374,15 @@ export default function Home() {
   }
 
   return (
-    <main ref={main} className="mx-auto flex w-full max-w-[640px] flex-col gap-[32px] px-[20px] pb-[40px] pt-[32px]">
-      <h1 className="heading">{t.appName}</h1>
-      {showPreferences && (
-        <ReadingPreferences language={language} onLanguageChange={changeLanguage} languageDisabled={pending !== null} t={t} />
-      )}
-      {content}
-    </main>
+    <>
+      <main ref={main} className="mx-auto flex w-full max-w-[640px] flex-col gap-[32px] px-[20px] pb-[40px] pt-[32px] print:hidden">
+        <h1 className="heading">{t.appName}</h1>
+        {showPreferences && (
+          <ReadingPreferences language={language} onLanguageChange={changeLanguage} languageDisabled={pending !== null} t={t} />
+        )}
+        {content}
+      </main>
+      {result && !pending && <PrintSummary result={result} chat={chat} language={language} t={t} />}
+    </>
   );
 }

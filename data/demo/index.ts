@@ -9,6 +9,7 @@ import medicalBillEn from "./medical_bill.en.json";
 import medicalBillEs from "./medical_bill.es.json";
 import snapEn from "./snap.en.json";
 import snapEs from "./snap.es.json";
+import { LETTER_TEXT } from "./letters";
 
 // Saved results for the printed sample letters, used with ?demo=1.
 export const DEMO_LETTERS = [
@@ -21,15 +22,18 @@ export const DEMO_LETTERS = [
 
 export type DemoLetter = (typeof DEMO_LETTERS)[number];
 
-const demoResults: Record<DemoLetter, Record<Language, DecodeResult>> = {
-  eviction: { en: evictionEn as DecodeResult, es: evictionEs as DecodeResult },
-  medicaid: { en: medicaidEn as DecodeResult, es: medicaidEs as DecodeResult },
-  medical_bill: { en: medicalBillEn as DecodeResult, es: medicalBillEs as DecodeResult },
-  snap: { en: snapEn as DecodeResult, es: snapEs as DecodeResult },
-  financial_aid: { en: financialAidEn as DecodeResult, es: financialAidEs as DecodeResult },
+// fullText is added from ./letters when a result is returned.
+type SavedResult = Omit<DecodeResult, "fullText">;
+
+const demoResults: Record<DemoLetter, Record<Language, SavedResult>> = {
+  eviction: { en: evictionEn as SavedResult, es: evictionEs as SavedResult },
+  medicaid: { en: medicaidEn as SavedResult, es: medicaidEs as SavedResult },
+  medical_bill: { en: medicalBillEn as SavedResult, es: medicalBillEs as SavedResult },
+  snap: { en: snapEn as SavedResult, es: snapEs as SavedResult },
+  financial_aid: { en: financialAidEn as SavedResult, es: financialAidEs as SavedResult },
 };
 
 export function getDemoResult(key: string, language: Language): DecodeResult | null {
   if (!(DEMO_LETTERS as readonly string[]).includes(key)) return null;
-  return demoResults[key as DemoLetter][language];
+  return { ...demoResults[key as DemoLetter][language], fullText: LETTER_TEXT[key as DemoLetter] };
 }
