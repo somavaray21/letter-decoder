@@ -34,7 +34,9 @@ export const LOCALES: Record<Language, string> = {
 
 // Interface text. The letter explanation itself comes back from Gemini in the chosen language.
 const en = {
+  // The app name stays "DocuMate" in every language; only the slogan under it is translated.
   appName: "DocuMate",
+  slogan: "Just the gist",
   tagline: "Upload a photo of a confusing letter. We'll explain it in plain words.",
   languageLabel: "Language",
   appearance: "Appearance",
@@ -151,6 +153,7 @@ export type Strings = typeof en;
 
 const es: Strings = {
   appName: "DocuMate",
+  slogan: "Solo lo esencial",
   tagline: "Suba una foto de una carta difícil. Se la explicamos en palabras sencillas.",
   languageLabel: "Idioma",
   appearance: "Apariencia",
@@ -265,6 +268,7 @@ const es: Strings = {
 
 const zh: Strings = {
   appName: "DocuMate",
+  slogan: "只讲重点",
   tagline: "上传一张看不懂的信件照片，我们用简单的话为您解释。",
   languageLabel: "语言",
   appearance: "外观",
@@ -379,6 +383,7 @@ const zh: Strings = {
 
 const fr: Strings = {
   appName: "DocuMate",
+  slogan: "Juste l'essentiel",
   tagline: "Envoyez la photo d'une lettre difficile à comprendre. Nous vous l'expliquons avec des mots simples.",
   languageLabel: "Langue",
   appearance: "Apparence",
@@ -493,6 +498,7 @@ const fr: Strings = {
 
 const hi: Strings = {
   appName: "DocuMate",
+  slogan: "बस काम की बात",
   tagline: "किसी उलझन वाले पत्र की फ़ोटो अपलोड करें। हम उसे आसान शब्दों में समझाएँगे।",
   languageLabel: "भाषा",
   appearance: "रूप",
@@ -607,6 +613,7 @@ const hi: Strings = {
 
 const ar: Strings = {
   appName: "DocuMate",
+  slogan: "الخلاصة فقط",
   tagline: "ارفع صورة رسالة صعبة الفهم، وسنشرحها لك بكلمات بسيطة.",
   languageLabel: "اللغة",
   appearance: "المظهر",
@@ -722,6 +729,7 @@ const ar: Strings = {
 
 const tl: Strings = {
   appName: "DocuMate",
+  slogan: "Ang buod lang",
   tagline: "Mag-upload ng litrato ng liham na nakakalito. Ipapaliwanag namin ito sa simpleng salita.",
   languageLabel: "Wika",
   appearance: "Itsura",
@@ -845,6 +853,7 @@ function russianPlural(n: number, one: string, few: string, many: string): strin
 
 const ru: Strings = {
   appName: "DocuMate",
+  slogan: "Только суть",
   tagline: "Загрузите фото непонятного письма. Мы объясним его простыми словами.",
   languageLabel: "Язык",
   appearance: "Оформление",
