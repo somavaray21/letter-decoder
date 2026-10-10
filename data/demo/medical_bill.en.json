@@ -18,5 +18,6 @@
   ],
   "sender": "Riverside General Hospital Patient Billing",
   "confidence": "high",
-  "language": "en"
+  "language": "en",
+  "zip": "08102"
 }

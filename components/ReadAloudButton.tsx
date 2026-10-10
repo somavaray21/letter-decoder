@@ -36,7 +36,7 @@ export function ReadAloudButton({ result, language, t }: { result: DecodeResult;
     return () => window.speechSynthesis.cancel();
   }, []);
 
-  if (!supported) return <p className="text-base text-neutral-700">{t.speechUnsupported}</p>;
+  if (!supported) return <p className="text-muted">{t.speechUnsupported}</p>;
 
   function toggle() {
     const synth = window.speechSynthesis;
@@ -62,7 +62,7 @@ export function ReadAloudButton({ result, language, t }: { result: DecodeResult;
       type="button"
       onClick={toggle}
       aria-pressed={speaking}
-      className="btn w-full bg-blue-800 text-white hover:bg-blue-900"
+      className="btn btn-primary sm:w-full"
     >
       <span aria-hidden="true">{speaking ? "■" : "🔊"}</span> {speaking ? t.stopReading : t.readAloud}
     </button>

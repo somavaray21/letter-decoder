@@ -24,4 +24,5 @@ export const mockResult: DecodeResult = {
   sender: "Maple Street Apartments LLC",
   confidence: "high",
   language: "en",
+  zip: "08102",
 };

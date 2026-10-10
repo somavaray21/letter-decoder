@@ -19,6 +19,7 @@ export type DecodeResult = {
   sender: string;
   confidence: "high" | "low"; // low = show "double-check this" banner
   language: string; // e.g. "en", "es"
+  zip: string; // ZIP code from the recipient's address, or "" if not found
 };
 
 export type DecodeRequest = {
@@ -28,10 +29,16 @@ export type DecodeRequest = {
   demo?: string; // demo letter key, only used with ?demo=1
 };
 
+export type TranslateRequest = {
+  result: DecodeResult;
+  language: Language;
+};
+
 export type Resource = {
   name: string;
   phone: string;
   url?: string;
   description: { en: string; es: string };
   letterTypes: (LetterType | "all")[];
+  zips?: string[]; // ZIP codes or prefixes served ("081" covers 08101–08199); omit for everywhere
 };
