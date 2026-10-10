@@ -12,7 +12,7 @@ const body = Atkinson_Hyperlegible({
 });
 
 export const metadata: Metadata = {
-  title: "DocuMate",
+  title: "DocuMate · Just the gist",
   description: "Upload a photo of a confusing official letter and get a plain-language explanation, deadlines and next steps.",
 };
 

@@ -549,7 +549,12 @@ export default function Home() {
   return (
     <>
       <main ref={main} className="mx-auto flex w-full max-w-[640px] flex-col gap-[32px] px-[20px] pb-[40px] pt-[32px] print:hidden">
-        <h1 className="heading">{t.appName}</h1>
+        <header className="flex flex-col gap-[4px]">
+          <h1 lang="en" className="heading">
+            {t.appName}
+          </h1>
+          <p className="font-serif text-[1.1111rem] italic text-muted">{t.slogan}</p>
+        </header>
         {showPreferences && (
           <ReadingPreferences language={language} onLanguageChange={changeLanguage} languageDisabled={pending !== null} t={t} />
         )}
