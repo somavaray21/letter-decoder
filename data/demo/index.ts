@@ -25,7 +25,7 @@ export type DemoLetter = (typeof DEMO_LETTERS)[number];
 // fullText is added from ./letters when a result is returned.
 type SavedResult = Omit<DecodeResult, "fullText">;
 
-const demoResults: Record<DemoLetter, Record<Language, SavedResult>> = {
+const demoResults: Record<DemoLetter, Partial<Record<Language, SavedResult>>> = {
   eviction: { en: evictionEn as SavedResult, es: evictionEs as SavedResult },
   medicaid: { en: medicaidEn as SavedResult, es: medicaidEs as SavedResult },
   medical_bill: { en: medicalBillEn as SavedResult, es: medicalBillEs as SavedResult },
@@ -33,7 +33,9 @@ const demoResults: Record<DemoLetter, Record<Language, SavedResult>> = {
   financial_aid: { en: financialAidEn as SavedResult, es: financialAidEs as SavedResult },
 };
 
+// Returns null for an unknown letter or a language with no saved result (only English and Spanish are saved).
 export function getDemoResult(key: string, language: Language): DecodeResult | null {
   if (!(DEMO_LETTERS as readonly string[]).includes(key)) return null;
-  return { ...demoResults[key as DemoLetter][language], fullText: LETTER_TEXT[key as DemoLetter] };
+  const saved = demoResults[key as DemoLetter][language];
+  return saved ? { ...saved, fullText: LETTER_TEXT[key as DemoLetter] } : null;
 }

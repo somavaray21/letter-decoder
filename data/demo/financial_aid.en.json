@@ -16,6 +16,18 @@
     "Ask the financial aid office to confirm they got them."
   ],
   "sender": "Lakeside Community College Office of Financial Aid",
+  "contacts": [
+    {
+      "type": "phone",
+      "value": "(856) 555-0188",
+      "label": "Office of Financial Aid"
+    },
+    {
+      "type": "email",
+      "value": "finaid@lakeside.example.edu",
+      "label": "Office of Financial Aid"
+    }
+  ],
   "confidence": "high",
   "language": "en",
   "zip": "08102"

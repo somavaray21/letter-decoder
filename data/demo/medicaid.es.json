@@ -22,6 +22,13 @@
     "Llame al número de la carta si tiene preguntas."
   ],
   "sender": "State Department of Health Services",
+  "contacts": [
+    {
+      "type": "phone",
+      "value": "1-800-555-0199",
+      "label": "Servicio al cliente (TTY 711)"
+    }
+  ],
   "confidence": "high",
   "language": "es",
   "zip": "08102"

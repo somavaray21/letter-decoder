@@ -123,7 +123,7 @@ export function LetterChat({
             type="button"
             onClick={() => ask(q)}
             disabled={asking !== null}
-            className="btn btn-secondary justify-start text-left"
+            className="btn btn-secondary justify-start text-start"
           >
             {q}
           </button>
@@ -152,7 +152,7 @@ export function LetterChat({
           className="min-h-[56px] w-full rounded-[14px] border-2 border-muted bg-card px-4 py-3 text-ink placeholder:text-muted"
         />
         <button type="submit" disabled={asking !== null || !draft.trim()} className="btn btn-primary">
-          <Icon name="send" />
+          <Icon name="send" className="rtl:-scale-x-100" />
           <span className="flex-1">{t.send}</span>
         </button>
       </form>

@@ -17,6 +17,13 @@
     "Do not put this bill on a credit card before you ask for help."
   ],
   "sender": "Riverside General Hospital Patient Billing",
+  "contacts": [
+    {
+      "type": "phone",
+      "value": "(856) 555-0177",
+      "label": "Billing and financial help"
+    }
+  ],
   "confidence": "high",
   "language": "en",
   "zip": "08102"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Strings } from "@/lib/i18n";
+import { LANGUAGE_NAMES, LANGUAGE_ORDER, type Strings } from "@/lib/i18n";
 import type { Language } from "@/lib/types";
 import { Icon } from "./Icon";
 
@@ -37,13 +37,13 @@ function useRootSetting<T extends string>(attr: "textSize" | "theme", key: strin
   return [value, choose] as const;
 }
 
-function Setting({ label, children }: { label: string; children: React.ReactNode }) {
+function Setting({ label, children, grid = false }: { label: string; children: React.ReactNode; grid?: boolean }) {
   return (
     <div role="group" aria-label={label} className="flex flex-col gap-[8px]">
       <p aria-hidden="true" className="font-bold">
         {label}
       </p>
-      <div className="flex gap-[8px]">{children}</div>
+      <div className={grid ? "grid grid-cols-2 gap-[8px]" : "flex gap-[8px]"}>{children}</div>
     </div>
   );
 }
@@ -84,24 +84,26 @@ export function ReadingPreferences({
       <Setting label={t.appearance}>
         {(["light", "dark"] as const).map((value) => (
           <button key={value} type="button" className="option" aria-pressed={theme === value} onClick={() => setTheme(value)}>
-            <Icon name={value === "light" ? "sun" : "moon"} size={20} className="ml-1" />
+            <Icon name={value === "light" ? "sun" : "moon"} size={20} className="ms-1" />
             <span className="flex-1">{value === "light" ? t.themeLight : t.themeDark}</span>
           </button>
         ))}
       </Setting>
 
-      <Setting label={t.languageLabel}>
-        {(["en", "es"] as const).map((code) => (
+      {/* Each language is written in its own name and script, so readers can find theirs from any page language. */}
+      <Setting label={t.languageLabel} grid>
+        {LANGUAGE_ORDER.map((code) => (
           <button
             key={code}
             type="button"
-            lang={code === "es" ? "es" : language}
+            lang={code}
+            dir="auto"
             className="option"
             aria-pressed={language === code}
             disabled={languageDisabled}
             onClick={() => onLanguageChange(code)}
           >
-            {t.languageNames[code]}
+            {LANGUAGE_NAMES[code]}
           </button>
         ))}
       </Setting>

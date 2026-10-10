@@ -22,6 +22,13 @@
     "Call the number on the letter if you have questions."
   ],
   "sender": "State Department of Health Services",
+  "contacts": [
+    {
+      "type": "phone",
+      "value": "1-800-555-0199",
+      "label": "Customer Service (TTY 711)"
+    }
+  ],
   "confidence": "high",
   "language": "en",
   "zip": "08102"

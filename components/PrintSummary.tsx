@@ -1,7 +1,7 @@
 import { formatDate, type Strings } from "@/lib/i18n";
 import type { DecodeResult, Language } from "@/lib/types";
 import type { ChatEntry } from "./LetterChat";
-import { matchResources } from "./Resources";
+import { matchResources, resourceDescription } from "./Resources";
 
 // One-column summary shown only when printing ("Save as PDF"). Hidden on screen.
 export function PrintSummary({
@@ -75,17 +75,25 @@ export function PrintSummary({
         </ol>
       </section>
 
-      {helpers.length > 0 && (
+      {(helpers.length > 0 || result.contacts.length > 0) && (
         <section>
           <h2>{t.whoToCall}</h2>
           <ul>
+            {result.contacts.map((c, i) => (
+              <li key={`${c.type}-${c.value}-${i}`}>
+                <p>
+                  {c.label && <strong>{c.label} · </strong>}
+                  <bdi dir="ltr">{c.value}</bdi>
+                </p>
+              </li>
+            ))}
             {helpers.map((r) => (
               <li key={r.name}>
                 <p>
                   <strong>{r.name}</strong> · {r.phone}
                   {r.url && <> · {new URL(r.url).hostname.replace(/^www\./, "")}</>}
                 </p>
-                <p>{r.description[language]}</p>
+                <p>{resourceDescription(r, language)}</p>
               </li>
             ))}
           </ul>

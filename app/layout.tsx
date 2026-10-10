@@ -13,7 +13,7 @@ const body = Atkinson_Hyperlegible({
 
 export const metadata: Metadata = {
   title: "Letter Decoder",
-  description: "Take a photo of a confusing official letter and get a plain-language explanation, deadlines and next steps.",
+  description: "Upload a photo of a confusing official letter and get a plain-language explanation, deadlines and next steps.",
 };
 
 export const viewport: Viewport = {
@@ -32,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${heading.variable} ${body.variable}`} suppressHydrationWarning>
+    <html lang="en" dir="ltr" className={`${heading.variable} ${body.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: applySavedPreferences }} />
       </head>

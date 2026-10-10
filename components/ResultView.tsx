@@ -18,11 +18,13 @@ export function ResultView({
   language,
   isDemo,
   t,
+  letterPages,
 }: {
   result: DecodeResult;
   language: Language;
   isDemo: boolean;
   t: Strings;
+  letterPages?: React.ReactNode; // the letter's photos, shown after the summary
 }) {
   const urgency = URGENCY_STYLES[result.urgency];
 
@@ -63,6 +65,8 @@ export function ResultView({
           </button>
         </div>
       </section>
+
+      {letterPages}
 
       <section aria-labelledby="deadlines-title" className="card">
         <h2 id="deadlines-title" className="heading">
@@ -131,7 +135,7 @@ export function ResultView({
         </ol>
       </section>
 
-      <Resources letterType={result.letterType} zip={result.zip} language={language} t={t} />
+      <Resources letterType={result.letterType} zip={result.zip} contacts={result.contacts} language={language} t={t} />
 
       <p className="text-muted">{t.disclaimer}</p>
     </div>
