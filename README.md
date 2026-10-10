@@ -22,14 +22,14 @@ Only send mock letters to the free Gemini tier: Google may use free-tier inputs.
 
 ## Demo mode
 
-Open `http://localhost:3000/?demo=1`. Pick the sample letter from the dropdown, take the photo as usual, and the app returns the saved result from `data/demo/` instead of calling Gemini. Use this on stage so the demo never depends on Wi-Fi or rate limits.
+Open `http://localhost:3000/?demo=1`. Pick the sample letter from the dropdown and press "Explain my letter" (no photo needed); the app returns the saved result from `data/demo/` instead of calling Gemini. Use this on stage so the demo never depends on Wi-Fi or rate limits.
 
 ## How it works
 
 1. `app/page.tsx` shrinks the photo to ~1500px wide in the browser and POSTs it with the language to `/api/decode`.
 2. `app/api/decode/route.ts` validates the request and calls `lib/gemini.ts`, which sends the image to Gemini Flash-Lite in JSON mode with the `DecodeResult` schema and validates the answer with zod. If Flash-Lite is busy or returns bad JSON, it falls back to Gemini Flash. Letters are always read in English first; Spanish is a second, text-only translation call, which keeps accents right.
    Switching language on the results page calls `app/api/translate/route.ts`, which translates the existing result without sending the photo again (under a second).
-3. `components/ResultView.tsx` shows the summary, urgency badge, deadlines (with the quoted line from the letter and an "Add to calendar" .ics download), numbered steps and matching local help from `data/resources.json`.
+3. The screens follow the Figma design (light and dark, Normal and Large text). `components/ResultView.tsx` shows the summary, urgency badge, deadlines (with the quoted line from the letter and an "Add to calendar" .ics download), numbered steps and matching local help from `data/resources.json`.
 4. Read-aloud uses the browser's `speechSynthesis`, picking a Spanish voice for Spanish.
 
 | File | What it is |

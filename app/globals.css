@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Design tokens: see "Design system" in CLAUDE.md. */
+/* Design tokens: see "Design system" in CLAUDE.md and the Figma file's variables. */
 :root {
   --paper: #faf7f2;
   --card: #ffffff;
@@ -9,18 +9,40 @@
   --muted: #5c554c;
   --teal: #0f5c5c;
   --teal-hover: #0b4747;
+  --on-teal: #ffffff;
   --high: #b42318;
   --high-bg: #fef3f2;
   --medium: #b54708;
   --medium-bg: #fffaeb;
   --low: #067647;
   --low-bg: #ecfdf3;
+  color-scheme: light;
   font-size: 112.5%; /* 18px body */
 }
 
-/* Text-size toggle scales everything, since sizes are rem-based. */
+/* Dark appearance. Figma defines page, card, border, text, primary and act-soon;
+   hover, urgent and not-urgent are matched to them at the same contrast. */
+:root[data-theme="dark"] {
+  --paper: #1a1714;
+  --card: #24201c;
+  --line: #3a342d;
+  --ink: #f5f0e8;
+  --muted: #c9c0b4;
+  --teal: #5fc4c0;
+  --teal-hover: #86d6d3;
+  --on-teal: #0e1f1f;
+  --high: #fda29b;
+  --high-bg: #3d1410;
+  --medium: #fec84b;
+  --medium-bg: #3a2508;
+  --low: #75e0a7;
+  --low-bg: #0b3020;
+  color-scheme: dark;
+}
+
+/* Text-size toggle scales everything by 1.25, since type sizes are rem-based. */
 :root[data-text-size="large"] {
-  font-size: 137.5%; /* 22px body */
+  font-size: 140.625%; /* 22.5px body */
 }
 
 @theme inline {
@@ -31,6 +53,7 @@
   --color-muted: var(--muted);
   --color-teal: var(--teal);
   --color-teal-hover: var(--teal-hover);
+  --color-on-teal: var(--on-teal);
   --color-high: var(--high);
   --color-high-bg: var(--high-bg);
   --color-medium: var(--medium);
@@ -50,32 +73,50 @@ body {
 
 h1,
 h2,
-h3 {
+h3,
+.font-serif {
   font-family: var(--font-heading), Georgia, serif;
+  font-variation-settings: "SOFT" 0, "WONK" 1;
   line-height: 1.2;
 }
 
 /* 3px teal focus ring everywhere. */
 :focus-visible {
   outline: 3px solid var(--teal);
-  outline-offset: 3px;
+  outline-offset: 2px;
+}
+
+/* Headings receive focus from code when the screen changes; they aren't controls, so no ring. */
+[tabindex="-1"]:focus {
+  outline: none;
 }
 
 @layer components {
+  /* Sizes in rem so the Large text setting scales them (1rem = 18px at Normal). */
+  .heading {
+    @apply font-serif text-[1.6667rem] font-semibold;
+  }
   .btn {
-    @apply inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-[14px] px-5 py-3 text-lg font-bold transition-colors sm:w-auto;
+    @apply inline-flex min-h-[56px] w-full cursor-pointer items-center justify-center gap-3 rounded-[14px] px-4 py-3 text-center text-[1.1111rem] font-bold leading-[1.4] transition-colors disabled:cursor-not-allowed disabled:border-line disabled:bg-line disabled:text-muted;
   }
   .btn-primary {
-    @apply bg-teal text-white hover:bg-teal-hover;
+    @apply bg-teal text-on-teal hover:bg-teal-hover;
   }
   .btn-secondary {
     @apply border-2 border-teal bg-card text-teal hover:bg-paper;
   }
-  .card {
-    @apply rounded-2xl border border-line bg-card p-5 shadow-[0_1px_3px_rgba(31,27,22,0.06),0_4px_12px_rgba(31,27,22,0.04)];
+  /* Two-choice setting buttons (text size, appearance, language). */
+  .option {
+    @apply flex min-h-[56px] min-w-0 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-[14px] border-2 border-teal bg-card px-2 py-2.5 text-center font-bold leading-[1.4] text-teal disabled:cursor-not-allowed disabled:opacity-60;
   }
-  .section-title {
-    @apply mb-4 text-[1.5rem] font-semibold;
+  .option[aria-pressed="true"] {
+    @apply bg-teal text-on-teal;
+  }
+  .card {
+    @apply flex flex-col gap-[24px] rounded-[16px] border border-line bg-card p-[24px] shadow-[0_2px_4px_var(--line)];
+  }
+  .banner {
+    @apply flex flex-col gap-[12px] rounded-[16px] border border-line bg-card p-[24px];
   }
 }
 
@@ -85,12 +126,12 @@ h3 {
     opacity: 1;
   }
   50% {
-    opacity: 0.55;
+    opacity: 0.78;
   }
 }
 
 .animate-gentle-pulse {
-  animation: gentle-pulse 2s ease-in-out infinite;
+  animation: gentle-pulse 2.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
