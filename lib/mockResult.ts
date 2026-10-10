@@ -22,6 +22,7 @@ export const mockResult: DecodeResult = {
     "Keep this letter and any receipts in a safe place.",
   ],
   sender: "Maple Street Apartments LLC",
+  contacts: [{ type: "phone", value: "(856) 555-0142", label: "Management office" }],
   confidence: "high",
   language: "en",
   zip: "08102",

@@ -5,8 +5,16 @@
     "url": "https://www.211.org",
     "description": {
       "en": "Free, confidential help finding local food, housing, health and legal services. Call or text 211, any time.",
-      "es": "Ayuda gratis y confidencial para encontrar comida, vivienda, salud y servicios legales cerca de usted. Llame o envíe un texto al 211, a cualquier hora."
+      "es": "Ayuda gratis y confidencial para encontrar comida, vivienda, salud y servicios legales cerca de usted. Llame o envíe un texto al 211, a cualquier hora.",
+      "zh": "免费、保密的帮助，帮您找到附近的食物、住房、医疗和法律服务。随时拨打或发短信到 211。",
+      "fr": "Aide gratuite et confidentielle pour trouver de la nourriture, un logement, des soins et des services juridiques près de chez vous. Appelez ou envoyez un SMS au 211, à toute heure.",
+      "hi": "अपने पास खाना, घर, इलाज और कानूनी मदद ढूँढने के लिए मुफ़्त और गोपनीय सहायता। किसी भी समय 211 पर कॉल या मैसेज करें।",
+      "ar": "مساعدة مجانية وسرية للعثور على الطعام والسكن والرعاية الصحية والخدمات القانونية بالقرب منك. اتصل أو أرسل رسالة نصية إلى 211 في أي وقت.",
+      "tl": "Libre at kumpidensyal na tulong para makahanap ng pagkain, pabahay, kalusugan at legal na serbisyo malapit sa inyo. Tumawag o mag-text sa 211, anumang oras.",
+      "ru": "Бесплатная и конфиденциальная помощь: еда, жильё, здоровье и юридические услуги рядом с вами. Звоните или пишите SMS на номер 211 в любое время."
     },
-    "letterTypes": ["all"]
+    "letterTypes": [
+      "all"
+    ]
   }
 ]

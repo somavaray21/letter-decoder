@@ -9,7 +9,7 @@ export const LETTER_TYPES = [
   "other",
 ] as const;
 
-export const LANGUAGES = ["en", "es"] as const;
+export const LANGUAGES = ["en", "es", "zh", "fr", "hi", "ar", "tl", "ru"] as const;
 
 // Runtime check for what Gemini sends back. Mirrors DecodeResult in lib/types.ts.
 export const decodeResultSchema = z.object({
@@ -25,6 +25,13 @@ export const decodeResultSchema = z.object({
   ),
   steps: z.array(z.string().min(1)).min(1).max(6),
   sender: z.string(),
+  contacts: z.array(
+    z.object({
+      type: z.enum(["phone", "email"]),
+      value: z.string().min(1),
+      label: z.string(),
+    }),
+  ),
   confidence: z.enum(["high", "low"]),
   language: z.string(),
   zip: z.string().regex(/^(\d{5})?$/, "zip must be 5 digits or empty"),
@@ -33,10 +40,20 @@ export const decodeResultSchema = z.object({
 
 // ~6 MB of base64 is far more than a 1500px JPEG needs.
 export const MAX_IMAGE_BASE64_LENGTH = 6_000_000;
+// The browser shrinks pages so a whole letter stays under this, which also fits Vercel's 4.5 MB request limit.
+export const MAX_TOTAL_BASE64_LENGTH = 4_000_000;
+export const MAX_PAGES = 8;
 
 export const decodeRequestSchema = z.object({
-  image: z.string().min(1).max(MAX_IMAGE_BASE64_LENGTH),
-  mimeType: z.string().regex(/^image\/[a-z0-9.+-]+$/i),
+  images: z
+    .array(
+      z.object({
+        data: z.string().min(1).max(MAX_IMAGE_BASE64_LENGTH),
+        mimeType: z.string().regex(/^image\/[a-z0-9.+-]+$/i),
+      }),
+    )
+    .max(MAX_PAGES)
+    .refine((images) => images.reduce((n, i) => n + i.data.length, 0) <= MAX_TOTAL_BASE64_LENGTH, "letter is too large"),
   language: z.enum(LANGUAGES),
   demo: z.string().optional(),
 });

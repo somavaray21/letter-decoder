@@ -1,7 +1,6 @@
 "use client";
 
 import type { Strings } from "@/lib/i18n";
-import type { Language } from "@/lib/types";
 import { Icon } from "./Icon";
 import { EnvelopeIllustration } from "./Illustrations";
 import { ProgressTrack, useEstimatedProgress } from "./ProgressBar";
@@ -29,7 +28,7 @@ export function DecodingCard({ expectedMs, t }: { expectedMs: number; t: Strings
 }
 
 // While a result is being rewritten in the other language, each section shows a placeholder with a bar.
-export function TranslatingView({ target, expectedMs, t }: { target: Language; expectedMs: number; t: Strings }) {
+export function TranslatingView({ expectedMs, t }: { expectedMs: number; t: Strings }) {
   const { percent, remaining } = useEstimatedProgress(expectedMs, t);
   const sections = [t.whatItIs, t.deadlines, t.steps, t.whoToCall];
 
@@ -38,7 +37,7 @@ export function TranslatingView({ target, expectedMs, t }: { target: Language; e
       <div role="status" className="banner">
         <Icon name="info" className="text-teal" />
         <p>
-          {t.translating} {t.translatingNote(target)}
+          {t.translating} {t.translatingNote}
         </p>
       </div>
       {sections.map((title, i) => (

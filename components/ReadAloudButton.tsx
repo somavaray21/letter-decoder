@@ -5,12 +5,23 @@ import { formatDate, type Strings } from "@/lib/i18n";
 import type { DecodeResult, Language } from "@/lib/types";
 import { Icon } from "./Icon";
 
+// Voice language for each app language. Tagalog voices are listed as Filipino ("fil").
+const SPEECH_LANG: Record<Language, string> = {
+  en: "en-US",
+  es: "es-US",
+  zh: "zh-CN",
+  fr: "fr-FR",
+  hi: "hi-IN",
+  ar: "ar-SA",
+  tl: "fil-PH",
+  ru: "ru-RU",
+};
+
 function pickVoice(language: Language): SpeechSynthesisVoice | undefined {
   const voices = window.speechSynthesis.getVoices();
-  return (
-    voices.find((v) => v.lang.toLowerCase().startsWith(language) && v.localService) ??
-    voices.find((v) => v.lang.toLowerCase().startsWith(language))
-  );
+  const prefixes = language === "tl" ? ["fil", "tl"] : [SPEECH_LANG[language].split("-")[0]];
+  const matches = (v: SpeechSynthesisVoice) => prefixes.some((p) => v.lang.toLowerCase().replace("_", "-").startsWith(p));
+  return voices.find((v) => matches(v) && v.localService) ?? voices.find(matches);
 }
 
 function buildScript(result: DecodeResult, language: Language, t: Strings): string {
@@ -62,7 +73,7 @@ export function SpeakButton({
       return;
     }
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language === "es" ? "es-US" : "en-US";
+    utterance.lang = SPEECH_LANG[language];
     const voice = pickVoice(language);
     if (voice) utterance.voice = voice;
     utterance.rate = 0.9;

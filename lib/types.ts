@@ -8,7 +8,16 @@ export type LetterType =
   | "financial_aid"
   | "other";
 
-export type Language = "en" | "es";
+// en English, es Spanish, zh Mandarin (Simplified Chinese), fr French, hi Hindi, ar Arabic (right to left),
+// tl Tagalog, ru Russian.
+export type Language = "en" | "es" | "zh" | "fr" | "hi" | "ar" | "tl" | "ru";
+
+// A phone number or email address printed in the letter.
+export type LetterContact = {
+  type: "phone" | "email";
+  value: string; // exactly as printed, e.g. "(856) 555-0142" or "help@example.gov"
+  label: string; // who it reaches, in the reader's language, e.g. "Billing office"
+};
 
 export type DecodeResult = {
   letterType: LetterType;
@@ -17,15 +26,20 @@ export type DecodeResult = {
   deadlines: { date: string; what: string; sourceQuote: string }[]; // ISO date
   steps: string[]; // 3–5 actions
   sender: string;
+  contacts: LetterContact[]; // every phone number and email printed in the letter
   confidence: "high" | "low"; // low = show "double-check this" banner
   language: string; // e.g. "en", "es"
   zip: string; // ZIP code from the recipient's address, or "" if not found
   fullText: string; // the full letter text, transcribed
 };
 
-export type DecodeRequest = {
-  image: string; // base64, no data: prefix
+export type LetterImage = {
+  data: string; // base64, no data: prefix
   mimeType: string;
+};
+
+export type DecodeRequest = {
+  images: LetterImage[]; // the pages of one letter, in order; empty only in demo mode
   language: Language;
   demo?: string; // demo letter key, only used with ?demo=1
 };
@@ -57,7 +71,7 @@ export type Resource = {
   name: string;
   phone: string;
   url?: string;
-  description: { en: string; es: string };
+  description: { en: string } & Partial<Record<Language, string>>; // English is used when a language is missing
   letterTypes: (LetterType | "all")[];
   zips?: string[]; // ZIP codes or prefixes served ("081" covers 08101–08199); omit for everywhere
 };

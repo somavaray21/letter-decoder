@@ -1,7 +1,7 @@
 import { GoogleGenAI, ThinkingLevel, type GenerateContentConfig, type Part } from "@google/genai";
 import { z } from "zod";
 import { askResponseSchema, decodeResultSchema } from "./schema";
-import type { AskResponse, ChatTurn, DecodeResult, Language } from "./types";
+import type { AskResponse, ChatTurn, DecodeResult, Language, LetterImage } from "./types";
 
 // Fastest first. Flash-Lite answers in about a second; if it is busy (503), rate limited,
 // or returns bad JSON, fall back to Flash with light thinking (about 4 seconds).
@@ -18,6 +18,23 @@ function modelChain(): ModelChoice[] {
 const LANGUAGE_NAMES: Record<Language, string> = {
   en: "English",
   es: "Spanish",
+  zh: "Mandarin Chinese, written in Simplified Chinese characters",
+  fr: "French",
+  hi: "Hindi, written in Devanagari script",
+  ar: "Arabic (Modern Standard Arabic)",
+  tl: "Tagalog (Filipino)",
+  ru: "Russian",
+};
+
+// Extra writing rules per language, used when translating and when answering questions.
+const LANGUAGE_NOTES: Partial<Record<Language, string>> = {
+  es: 'Use Latin American Spanish, formal "usted", and proper spelling with every accent mark and ñ (for example: azúcar, médico, revisión, días). Text without accent marks is wrong.',
+  zh: "Use Simplified Chinese characters and everyday Mandarin, not classical or formal written Chinese.",
+  fr: 'Use formal "vous" and proper spelling with every accent mark (for example: médecin, délai, reçu). Text without accent marks is wrong.',
+  hi: "Use simple everyday Hindi in Devanagari script. Common English words people use in daily life (like bill, form, office) are fine.",
+  ar: "Use simple Modern Standard Arabic with everyday words.",
+  tl: "Use everyday Tagalog as spoken in the Philippines and the US. Common English words people use in daily Taglish (like bill, form, office) are fine.",
+  ru: "Use simple everyday Russian and the formal «вы».",
 };
 
 // Plain JSON schema for Gemini's JSON mode. Gemini only supports a subset of JSON Schema,
@@ -42,13 +59,16 @@ const translationSchema = z.object({
   summary: z.string().min(1),
   steps: z.array(z.string().min(1)),
   deadlineWhats: z.array(z.string().min(1)),
+  contactLabels: z.array(z.string()),
 });
 const translationJsonSchema = toGeminiSchema(z.toJSONSchema(translationSchema));
 
 function buildDecodePrompt(language: Language, today: string): string {
   const languageName = LANGUAGE_NAMES[language];
   return `You help people understand official letters (government benefits, medical bills, housing, school financial aid, health).
-Read the letter in the image and explain it to someone who may not read well and may be stressed.
+Read the letter in the images and explain it to someone who may not read well and may be stressed.
+
+The images are the pages of ONE letter, in order. If there is more than one, read them all together as a single letter.
 
 Today's date is ${today}.
 
@@ -60,18 +80,19 @@ Rules:
 - "deadlines": every date by which the reader must do something. "date" is YYYY-MM-DD. If the letter gives a relative deadline (like "within 14 days"), work out the date from the letter's own date if shown, otherwise from today. "sourceQuote" is the exact sentence from the letter, copied word for word in its original language. Use an empty list if there are no deadlines.
 - "steps": 3 to 5 concrete actions, most important first, each starting with a verb.
 - "sender": the organization or person that sent the letter, as written on it.
+- "contacts": every phone number and email address printed anywhere in the letter, once each, most useful first. "type" is "phone" or "email". "value" is copied exactly as printed (keep extensions like "ext. 12"). "label" says in a few ${languageName} words who it reaches or what it is for (for example "Billing office" or "Customer service, TTY 711"). Use an empty list if there are none.
 - "confidence": "low" if the image is blurry, cut off, not an official letter, or you are unsure about any deadline or amount. Otherwise "high".
 - "language": "${language}".
 - "zip": the 5-digit ZIP code from the recipient's mailing address (not the sender's), or "" if there is none.
-- "fullText": the whole letter transcribed word for word in its original language, top to bottom, keeping line breaks. Include names, addresses, phone numbers, dates and amounts exactly as printed. Do not summarize, fix or translate it. Use "" if the image is not a letter.
+- "fullText": the whole letter transcribed word for word in its original language, page by page and top to bottom, keeping line breaks. Include names, addresses, phone numbers, dates and amounts exactly as printed. Do not summarize, fix or translate it. Use "" if the images are not a letter.
 - Never invent phone numbers, amounts, dates, or names that are not in the letter.
-- If the image is not a letter, set letterType "other", confidence "low", and say so in the summary.`;
+- If the images are not a letter, set letterType "other", confidence "low", and say so in the summary.`;
 }
 
 function buildTranslatePrompt(language: Language, text: z.infer<typeof translationSchema>): string {
   return `Translate this plain-language explanation of a letter into ${LANGUAGE_NAMES[language]}.
 Keep it at a 6th-grade reading level with short sentences and everyday words.
-For Spanish: Latin American Spanish, formal "usted", and proper spelling with every accent mark and ñ (for example: azúcar, médico, revisión, días). Text without accent marks is wrong.
+${LANGUAGE_NOTES[language] ?? ""}
 Keep phone numbers, email addresses, amounts and names exactly as they are.
 Return the same fields with the same number of items, in the same order.
 
@@ -93,9 +114,7 @@ function buildAskPrompt(language: Language, fullText: string, history: ChatTurn[
 Rules:
 - Answer ONLY using information in the letter below. Do not use outside knowledge about the topic.
 - Write "answer" in ${languageName}, at a 6th-grade reading level, in 1 to 3 short sentences with everyday words.${
-    language === "es"
-      ? ' Use Latin American Spanish, formal "usted", and proper spelling with every accent mark and ñ.'
-      : ""
+    LANGUAGE_NOTES[language] ? ` ${LANGUAGE_NOTES[language]}` : ""
   }
 - "sourceQuote": the exact line from the letter that supports the answer, copied word for word in the letter's original language. Use "" only if the letter does not contain the answer.
 - "foundInLetter": true if the letter contains the answer, false if not.
@@ -180,11 +199,12 @@ const lenientDecodeSchema = z.preprocess((value) => {
 }, decodeResultSchema);
 
 // Flash-Lite reads letters well but drops Spanish accents when it writes Spanish straight from
-// the photo, so Spanish is decoded in English first and then translated (about 2 seconds total).
-export async function decodeLetter(image: string, mimeType: string, language: Language): Promise<DecodeResult> {
+// the photo, so every letter is decoded in English first and then translated (about 2 seconds total).
+// All pages go in one request, in order, so Gemini reads them as one letter.
+export async function decodeLetter(images: LetterImage[], language: Language): Promise<DecodeResult> {
   const today = new Date().toISOString().slice(0, 10);
   const result = await generate(
-    [{ inlineData: { data: image, mimeType } }, { text: buildDecodePrompt("en", today) }],
+    [...images.map(({ data, mimeType }) => ({ inlineData: { data, mimeType } })), { text: buildDecodePrompt("en", today) }],
     decodeJsonSchema,
     lenientDecodeSchema,
   );
@@ -198,12 +218,16 @@ export async function translateResult(result: DecodeResult, language: Language):
     summary: result.summary,
     steps: result.steps,
     deadlineWhats: result.deadlines.map((d) => d.what),
+    contactLabels: result.contacts.map((c) => c.label),
   };
   const translated = await generate(
     [{ text: buildTranslatePrompt(language, source) }],
     translationJsonSchema,
     translationSchema.refine(
-      (t) => t.steps.length === source.steps.length && t.deadlineWhats.length === source.deadlineWhats.length,
+      (t) =>
+        t.steps.length === source.steps.length &&
+        t.deadlineWhats.length === source.deadlineWhats.length &&
+        t.contactLabels.length === source.contactLabels.length,
       "translation changed the number of items",
     ),
   );
@@ -212,6 +236,7 @@ export async function translateResult(result: DecodeResult, language: Language):
     summary: translated.summary,
     steps: translated.steps,
     deadlines: result.deadlines.map((d, i) => ({ ...d, what: translated.deadlineWhats[i] })),
+    contacts: result.contacts.map((c, i) => ({ ...c, label: translated.contactLabels[i] })),
     language,
   };
 }

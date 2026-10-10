@@ -200,7 +200,7 @@ h3,
   }
   .print-summary ol {
     list-style: decimal;
-    padding-left: 18pt;
+    padding-inline-start: 18pt;
   }
   .print-summary .quote {
     font-size: 10.5pt;

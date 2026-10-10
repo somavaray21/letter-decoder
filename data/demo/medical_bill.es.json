@@ -17,6 +17,13 @@
     "No pague con tarjeta de crédito antes de pedir ayuda."
   ],
   "sender": "Riverside General Hospital Patient Billing",
+  "contacts": [
+    {
+      "type": "phone",
+      "value": "(856) 555-0177",
+      "label": "Facturación y ayuda financiera"
+    }
+  ],
   "confidence": "high",
   "language": "es",
   "zip": "08102"

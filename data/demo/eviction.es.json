@@ -17,6 +17,13 @@
     "Guarde esta carta y todos los recibos en un lugar seguro."
   ],
   "sender": "Maple Street Apartments LLC",
+  "contacts": [
+    {
+      "type": "phone",
+      "value": "(856) 555-0142",
+      "label": "Oficina de administración"
+    }
+  ],
   "confidence": "high",
   "language": "es",
   "zip": "08102"
