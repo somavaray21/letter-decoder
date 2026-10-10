@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatDate, type Strings } from "@/lib/i18n";
 import type { DecodeResult, Language } from "@/lib/types";
+import { Icon } from "./Icon";
 
 function pickVoice(language: Language): SpeechSynthesisVoice | undefined {
   const voices = window.speechSynthesis.getVoices();
@@ -58,13 +59,9 @@ export function ReadAloudButton({ result, language, t }: { result: DecodeResult;
   }
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-pressed={speaking}
-      className="btn btn-primary sm:w-full"
-    >
-      <span aria-hidden="true">{speaking ? "■" : "🔊"}</span> {speaking ? t.stopReading : t.readAloud}
+    <button type="button" onClick={toggle} aria-pressed={speaking} className="btn btn-primary">
+      <Icon name={speaking ? "stop" : "speaker"} />
+      <span className="flex-1">{speaking ? t.stopReading : t.readAloud}</span>
     </button>
   );
 }

@@ -1,6 +1,7 @@
 import resources from "@/data/resources.json";
 import type { Strings } from "@/lib/i18n";
 import type { Language, LetterType, Resource } from "@/lib/types";
+import { Icon } from "./Icon";
 
 // A resource serves a ZIP when it lists no ZIPs (works anywhere) or one of its entries is a prefix of the ZIP.
 function servesZip(resource: Resource, zip: string): boolean {
@@ -29,25 +30,30 @@ export function Resources({
 
   return (
     <section aria-labelledby="who-to-call" className="card">
-      <h2 id="who-to-call" className="section-title">
+      <h2 id="who-to-call" className="heading">
         {t.whoToCall}
       </h2>
-      {zip && <p className="-mt-2 mb-4 text-muted">{t.helpNear(zip)}</p>}
-      <ul className="space-y-4">
+      {zip && <p className="text-muted">{t.helpNear(zip)}</p>}
+      <ul className="flex flex-col gap-[24px]">
         {matches.map((r) => (
-          <li key={r.name} className="rounded-[14px] border border-line p-4">
-            <p className="text-xl font-bold">{r.name}</p>
-            <p className="mt-1 text-muted">{r.description[language]}</p>
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              <a href={`tel:${r.phone.replace(/[^\d+]/g, "")}`} className="btn btn-primary">
-                <span aria-hidden="true">📞</span> {t.call} {r.phone}
-              </a>
-              {r.url && (
+          <li key={r.name} className="flex flex-col gap-[16px] rounded-[16px] border border-line bg-paper p-[24px]">
+            <p className="text-[1.1111rem] font-bold leading-[1.4]">{r.name}</p>
+            <p>{r.description[language]}</p>
+            <a href={`tel:${r.phone.replace(/[^\d+]/g, "")}`} className="btn btn-primary">
+              <Icon name="phone" />
+              <span className="flex-1">
+                {t.call} {r.phone}
+              </span>
+            </a>
+            {r.url && (
+              <>
                 <a href={r.url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
-                  {t.website}
+                  <Icon name="external" />
+                  <span className="flex-1">{t.website}</span>
                 </a>
-              )}
-            </div>
+                <p className="text-muted">{new URL(r.url).hostname.replace(/^www\./, "")}</p>
+              </>
+            )}
           </li>
         ))}
       </ul>
