@@ -6,12 +6,19 @@ export const strings = {
     appName: "Letter Decoder",
     tagline: "Take a photo of a confusing letter. We'll explain it in plain words.",
     languageLabel: "Language",
-    takePhoto: "Take or upload a photo",
+    takePhoto: "Take a photo",
+    takePhotoHint: "Or choose a photo you already took.",
     changePhoto: "Choose a different photo",
     previewAlt: "Photo of your letter",
     decode: "Explain my letter",
     loading: "Reading your letter…",
+    loadingStages: ["Reading your letter…", "Finding dates and next steps…", "Writing it in plain words…"],
+    translating: "Changing the language…",
+    progressLabel: "Progress",
+    secondsLeft: (n: number) => (n === 1 ? "About 1 second left" : `About ${n} seconds left`),
+    almostDone: "Almost done…",
     errorGeneric: "Sorry, we couldn't read that letter. Try again with a clear, flat photo in good light.",
+    errorTranslate: "Sorry, we couldn't change the language just now. Please try again.",
     errorRateLimited: "Lots of people are using this right now. Please wait a minute and try again.",
     errorImage: "We couldn't open that photo. Try taking it again.",
     errorMissingKey: "The app isn't set up yet: add GEMINI_API_KEY to .env.local, then restart npm run dev. Or add ?demo=1 to the address to try demo mode.",
@@ -34,6 +41,7 @@ export const strings = {
     addToCalendar: "Add to calendar",
     steps: "What to do next",
     whoToCall: "Who can help",
+    helpNear: (zip: string) => `Help near ZIP code ${zip}`,
     call: "Call",
     website: "Website",
     lowConfidence: "We're not sure we read this letter correctly. Please double-check the dates and amounts with the letter itself or with someone you trust.",
@@ -54,12 +62,19 @@ export const strings = {
     appName: "Descifra tu Carta",
     tagline: "Tome una foto de una carta difícil. Se la explicamos en palabras sencillas.",
     languageLabel: "Idioma",
-    takePhoto: "Tomar o subir una foto",
+    takePhoto: "Tomar una foto",
+    takePhotoHint: "O elija una foto que ya tomó.",
     changePhoto: "Elegir otra foto",
     previewAlt: "Foto de su carta",
     decode: "Explicar mi carta",
     loading: "Leyendo su carta…",
+    loadingStages: ["Leyendo su carta…", "Buscando fechas y próximos pasos…", "Escribiéndolo en palabras sencillas…"],
+    translating: "Cambiando el idioma…",
+    progressLabel: "Progreso",
+    secondsLeft: (n: number) => (n === 1 ? "Falta 1 segundo" : `Faltan unos ${n} segundos`),
+    almostDone: "Ya casi…",
     errorGeneric: "Lo sentimos, no pudimos leer esa carta. Intente otra vez con una foto clara, plana y con buena luz.",
+    errorTranslate: "Lo sentimos, no pudimos cambiar el idioma ahora. Intente otra vez.",
     errorRateLimited: "Mucha gente está usando esto ahora. Espere un minuto e intente otra vez.",
     errorImage: "No pudimos abrir esa foto. Intente tomarla otra vez.",
     errorMissingKey: "La aplicación no está configurada: agregue GEMINI_API_KEY a .env.local y reinicie npm run dev. O agregue ?demo=1 a la dirección para usar el modo demo.",
@@ -82,6 +97,7 @@ export const strings = {
     addToCalendar: "Agregar al calendario",
     steps: "Qué hacer ahora",
     whoToCall: "Quién puede ayudar",
+    helpNear: (zip: string) => `Ayuda cerca del código postal ${zip}`,
     call: "Llamar",
     website: "Sitio web",
     lowConfidence: "No estamos seguros de haber leído bien esta carta. Revise las fechas y cantidades con la carta misma o con alguien de confianza.",
@@ -101,6 +117,19 @@ export const strings = {
 } as const;
 
 export type Strings = (typeof strings)[Language];
+
+// "Nov 15" / "15 nov" for the big date on deadline cards.
+export function formatShortDate(isoDate: string, language: Language): { day: string; month: string; weekday: string; year: string } {
+  const d = new Date(`${isoDate}T12:00:00`);
+  const locale = language === "es" ? "es-US" : "en-US";
+  if (Number.isNaN(d.getTime())) return { day: isoDate, month: "", weekday: "", year: "" };
+  return {
+    day: String(d.getDate()),
+    month: d.toLocaleDateString(locale, { month: "short" }).replace(".", ""),
+    weekday: d.toLocaleDateString(locale, { weekday: "long" }),
+    year: String(d.getFullYear()),
+  };
+}
 
 export function formatDate(isoDate: string, language: Language): string {
   const d = new Date(`${isoDate}T12:00:00`);

@@ -1,38 +1,103 @@
 @import "tailwindcss";
 
-/* Light, high-contrast theme only: dark grey text on white passes WCAG AAA. */
+/* Design tokens: see "Design system" in CLAUDE.md. */
 :root {
-  --background: #ffffff;
-  --foreground: #111111;
-  font-size: 112.5%; /* 18px base */
+  --paper: #faf7f2;
+  --card: #ffffff;
+  --line: #e8e2d9;
+  --ink: #1f1b16;
+  --muted: #5c554c;
+  --teal: #0f5c5c;
+  --teal-hover: #0b4747;
+  --high: #b42318;
+  --high-bg: #fef3f2;
+  --medium: #b54708;
+  --medium-bg: #fffaeb;
+  --low: #067647;
+  --low-bg: #ecfdf3;
+  font-size: 112.5%; /* 18px body */
 }
 
-/* Text-size toggle scales everything, since Tailwind sizes are rem-based. */
+/* Text-size toggle scales everything, since sizes are rem-based. */
 :root[data-text-size="large"] {
-  font-size: 137.5%; /* 22px base */
+  font-size: 137.5%; /* 22px body */
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-teal: var(--teal);
+  --color-teal-hover: var(--teal-hover);
+  --color-high: var(--high);
+  --color-high-bg: var(--high-bg);
+  --color-medium: var(--medium);
+  --color-medium-bg: var(--medium-bg);
+  --color-low: var(--low);
+  --color-low-bg: var(--low-bg);
+  --font-sans: var(--font-body), system-ui, sans-serif;
+  --font-serif: var(--font-heading), Georgia, serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  line-height: 1.5;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  line-height: 1.6;
 }
 
-/* Thick, visible keyboard focus everywhere. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading), Georgia, serif;
+  line-height: 1.2;
+}
+
+/* 3px teal focus ring everywhere. */
 :focus-visible {
-  outline: 4px solid #1d4ed8;
+  outline: 3px solid var(--teal);
   outline-offset: 3px;
 }
 
 @layer components {
   .btn {
-    @apply inline-flex min-h-14 items-center justify-center gap-2 rounded-xl px-5 py-3 text-xl font-bold;
+    @apply inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-[14px] px-5 py-3 text-lg font-bold transition-colors sm:w-auto;
+  }
+  .btn-primary {
+    @apply bg-teal text-white hover:bg-teal-hover;
+  }
+  .btn-secondary {
+    @apply border-2 border-teal bg-card text-teal hover:bg-paper;
   }
   .card {
-    @apply rounded-2xl border-2 border-neutral-300 bg-white p-5;
+    @apply rounded-2xl border border-line bg-card p-5 shadow-[0_1px_3px_rgba(31,27,22,0.06),0_4px_12px_rgba(31,27,22,0.04)];
   }
   .section-title {
-    @apply mb-3 text-2xl font-extrabold;
+    @apply mb-4 text-[1.5rem] font-semibold;
+  }
+}
+
+@keyframes gentle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

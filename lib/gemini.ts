@@ -1,10 +1,19 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel, type GenerateContentConfig, type Part } from "@google/genai";
 import { z } from "zod";
 import { decodeResultSchema } from "./schema";
 import type { DecodeResult, Language } from "./types";
 
-// "gemini-flash-latest" always points at Google's current Flash model. Override with GEMINI_MODEL.
-const DEFAULT_MODEL = "gemini-flash-latest";
+// Fastest first. Flash-Lite answers in about a second; if it is busy (503), rate limited,
+// or returns bad JSON, fall back to Flash with light thinking (about 4 seconds).
+// GEMINI_MODEL replaces the first model.
+type ModelChoice = { model: string; config: GenerateContentConfig };
+
+function modelChain(): ModelChoice[] {
+  return [
+    { model: process.env.GEMINI_MODEL || "gemini-flash-lite-latest", config: {} },
+    { model: "gemini-flash-latest", config: { thinkingConfig: { thinkingLevel: ThinkingLevel.LOW } } },
+  ];
+}
 
 const LANGUAGE_NAMES: Record<Language, string> = {
   en: "English",
@@ -26,27 +35,46 @@ function toGeminiSchema(value: unknown): unknown {
   return value;
 }
 
-const responseJsonSchema = toGeminiSchema(z.toJSONSchema(decodeResultSchema));
+const decodeJsonSchema = toGeminiSchema(z.toJSONSchema(decodeResultSchema));
 
-function buildPrompt(language: Language, today: string): string {
+// Only the reader-facing text gets translated; dates, quotes and names stay as they are.
+const translationSchema = z.object({
+  summary: z.string().min(1),
+  steps: z.array(z.string().min(1)),
+  deadlineWhats: z.array(z.string().min(1)),
+});
+const translationJsonSchema = toGeminiSchema(z.toJSONSchema(translationSchema));
+
+function buildDecodePrompt(language: Language, today: string): string {
   const languageName = LANGUAGE_NAMES[language];
-  return `You help people understand official letters (government benefits, medical bills, housing, school financial aid).
+  return `You help people understand official letters (government benefits, medical bills, housing, school financial aid, health).
 Read the letter in the image and explain it to someone who may not read well and may be stressed.
 
 Today's date is ${today}.
 
 Rules:
-- Write "summary", "steps", and each deadline's "what" in ${languageName}, at a 6th-grade reading level. Use short sentences and everyday words. No legal or medical jargon.
+- The letter may be in English, but write "summary", "steps", and each deadline's "what" ONLY in ${languageName}, at a 6th-grade reading level. Use short sentences and everyday words. No legal or medical jargon.
 - "summary": 1 or 2 sentences saying what the letter is and what it wants from the reader.
 - "letterType": medicaid, snap, medical_bill, eviction, financial_aid, or other.
 - "urgency": "high" if missing it could cost the reader housing, health coverage, food aid, or money within about 30 days; "medium" if action is needed but not urgent; "low" if it is just information.
 - "deadlines": every date by which the reader must do something. "date" is YYYY-MM-DD. If the letter gives a relative deadline (like "within 14 days"), work out the date from the letter's own date if shown, otherwise from today. "sourceQuote" is the exact sentence from the letter, copied word for word in its original language. Use an empty list if there are no deadlines.
 - "steps": 3 to 5 concrete actions, most important first, each starting with a verb.
-- "sender": the organization that sent the letter, as written on it.
+- "sender": the organization or person that sent the letter, as written on it.
 - "confidence": "low" if the image is blurry, cut off, not an official letter, or you are unsure about any deadline or amount. Otherwise "high".
 - "language": "${language}".
+- "zip": the 5-digit ZIP code from the recipient's mailing address (not the sender's), or "" if there is none.
 - Never invent phone numbers, amounts, dates, or names that are not in the letter.
 - If the image is not a letter, set letterType "other", confidence "low", and say so in the summary.`;
+}
+
+function buildTranslatePrompt(language: Language, text: z.infer<typeof translationSchema>): string {
+  return `Translate this plain-language explanation of a letter into ${LANGUAGE_NAMES[language]}.
+Keep it at a 6th-grade reading level with short sentences and everyday words.
+For Spanish: Latin American Spanish, formal "usted", and proper spelling with every accent mark and ñ (for example: azúcar, médico, revisión, días). Text without accent marks is wrong.
+Keep phone numbers, email addresses, amounts and names exactly as they are.
+Return the same fields with the same number of items, in the same order.
+
+${JSON.stringify(text)}`;
 }
 
 export type DecodeErrorCode = "missing_key" | "invalid_key" | "rate_limited" | "bad_model" | "bad_output" | "gemini_error";
@@ -71,50 +99,81 @@ function classify(err: unknown): DecodeError {
   return new DecodeError("gemini_error", message);
 }
 
-export async function decodeLetter(
-  image: string,
-  mimeType: string,
-  language: Language,
-): Promise<DecodeResult> {
+// Runs the prompt down the model chain until one returns JSON that passes `schema`.
+// A bad key stops right away; anything else (busy, rate limit, bad JSON) tries the next model.
+async function generate<T>(parts: Part[], jsonSchema: unknown, schema: z.ZodType<T>): Promise<T> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new DecodeError("missing_key", "GEMINI_API_KEY is not set in .env.local");
-
   const ai = new GoogleGenAI({ apiKey });
-  const today = new Date().toISOString().slice(0, 10);
-  const model = process.env.GEMINI_MODEL || DEFAULT_MODEL;
 
-  let lastError: unknown;
-  // One try plus one retry if the JSON comes back malformed.
-  for (let attempt = 0; attempt < 2; attempt++) {
-    let response;
+  let lastError: DecodeError | undefined;
+  for (const { model, config } of modelChain()) {
     try {
-      response = await ai.models.generateContent({
+      const response = await ai.models.generateContent({
         model,
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { inlineData: { data: image, mimeType } },
-              { text: buildPrompt(language, today) },
-            ],
-          },
-        ],
+        contents: [{ role: "user", parts }],
         config: {
+          ...config,
           responseMimeType: "application/json",
-          responseJsonSchema,
+          responseJsonSchema: jsonSchema,
           temperature: 0.2,
         },
       });
+      const parsed = schema.safeParse(JSON.parse(response.text ?? ""));
+      if (parsed.success) return parsed.data;
+      lastError = new DecodeError("bad_output", `${model} returned JSON that failed validation: ${parsed.error.message}`);
     } catch (err) {
-      throw classify(err);
+      const classified = err instanceof SyntaxError ? new DecodeError("bad_output", `${model} returned invalid JSON`) : classify(err);
+      if (classified.code === "invalid_key") throw classified;
+      lastError = classified;
     }
-
-    try {
-      const parsed = decodeResultSchema.parse(JSON.parse(response.text ?? ""));
-      return { ...parsed, language };
-    } catch (err) {
-      lastError = err;
-    }
+    console.warn(`gemini: ${model} failed, trying next model`, lastError.message);
   }
-  throw new DecodeError("bad_output", `Gemini returned invalid JSON twice: ${String(lastError)}`);
+  throw lastError ?? new DecodeError("gemini_error", "No model available");
+}
+
+// Gemini sometimes returns ZIP+4 ("08102-1234"); keep the first five digits.
+const lenientDecodeSchema = z.preprocess((value) => {
+  if (value && typeof value === "object" && "zip" in value) {
+    const zip = String((value as { zip: unknown }).zip ?? "").match(/\d{5}/)?.[0] ?? "";
+    return { ...value, zip };
+  }
+  return value;
+}, decodeResultSchema);
+
+// Flash-Lite reads letters well but drops Spanish accents when it writes Spanish straight from
+// the photo, so Spanish is decoded in English first and then translated (about 2 seconds total).
+export async function decodeLetter(image: string, mimeType: string, language: Language): Promise<DecodeResult> {
+  const today = new Date().toISOString().slice(0, 10);
+  const result = await generate(
+    [{ inlineData: { data: image, mimeType } }, { text: buildDecodePrompt("en", today) }],
+    decodeJsonSchema,
+    lenientDecodeSchema,
+  );
+  const english = { ...result, language: "en" };
+  return language === "en" ? english : translateResult(english, language);
+}
+
+// Re-writes an existing result in another language without sending the photo again.
+export async function translateResult(result: DecodeResult, language: Language): Promise<DecodeResult> {
+  const source = {
+    summary: result.summary,
+    steps: result.steps,
+    deadlineWhats: result.deadlines.map((d) => d.what),
+  };
+  const translated = await generate(
+    [{ text: buildTranslatePrompt(language, source) }],
+    translationJsonSchema,
+    translationSchema.refine(
+      (t) => t.steps.length === source.steps.length && t.deadlineWhats.length === source.deadlineWhats.length,
+      "translation changed the number of items",
+    ),
+  );
+  return {
+    ...result,
+    summary: translated.summary,
+    steps: translated.steps,
+    deadlines: result.deadlines.map((d, i) => ({ ...d, what: translated.deadlineWhats[i] })),
+    language,
+  };
 }

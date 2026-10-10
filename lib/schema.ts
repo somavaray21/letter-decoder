@@ -27,6 +27,7 @@ export const decodeResultSchema = z.object({
   sender: z.string(),
   confidence: z.enum(["high", "low"]),
   language: z.string(),
+  zip: z.string().regex(/^(\d{5})?$/, "zip must be 5 digits or empty"),
 });
 
 // ~6 MB of base64 is far more than a 1500px JPEG needs.
@@ -37,4 +38,9 @@ export const decodeRequestSchema = z.object({
   mimeType: z.string().regex(/^image\/[a-z0-9.+-]+$/i),
   language: z.enum(LANGUAGES),
   demo: z.string().optional(),
+});
+
+export const translateRequestSchema = z.object({
+  result: decodeResultSchema,
+  language: z.enum(LANGUAGES),
 });
