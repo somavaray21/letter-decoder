@@ -12,7 +12,7 @@ const body = Atkinson_Hyperlegible({
 });
 
 export const metadata: Metadata = {
-  title: "Letter Decoder",
+  title: "DocuMate",
   description: "Upload a photo of a confusing official letter and get a plain-language explanation, deadlines and next steps.",
 };
 
@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 
 // Applies the saved text size and appearance before first paint, so a dark-mode reader never sees a white flash.
 // Keys match components/ReadingPreferences.tsx. With nothing saved, appearance follows the phone's setting.
-const applySavedPreferences = `try{var d=document.documentElement,s=localStorage.getItem("letter-decoder:text-size"),t=localStorage.getItem("letter-decoder:theme");d.dataset.textSize=s==="large"?"large":"normal";d.dataset.theme=t==="dark"||t==="light"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(e){}`;
+const applySavedPreferences = `try{var d=document.documentElement,s=localStorage.getItem("documate:text-size"),t=localStorage.getItem("documate:theme");d.dataset.textSize=s==="large"?"large":"normal";d.dataset.theme=t==="dark"||t==="light"?t:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(e){}`;
 
 export default function RootLayout({
   children,

@@ -6,8 +6,8 @@ import type { Language } from "@/lib/types";
 import { Icon } from "./Icon";
 
 // The layout's inline script applies the saved choices before first paint; these keys must match it.
-export const TEXT_SIZE_KEY = "letter-decoder:text-size";
-export const THEME_KEY = "letter-decoder:theme";
+export const TEXT_SIZE_KEY = "documate:text-size";
+export const THEME_KEY = "documate:theme";
 
 type TextSize = "normal" | "large";
 type Theme = "light" | "dark";

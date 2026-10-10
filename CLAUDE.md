@@ -1,4 +1,4 @@
-# Letter Decoder
+# DocuMate
 
 Hackathon app: photo of an official letter → plain-language explanation via Gemini. See README.md.
 

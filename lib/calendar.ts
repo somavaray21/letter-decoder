@@ -14,11 +14,11 @@ export function buildIcs(isoDate: string, title: string, description: string): s
   const day = isoDate.replace(/-/g, "");
   const end = nextDay(isoDate).replace(/-/g, "");
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-  const uid = `${day}-${Math.random().toString(36).slice(2)}@letter-decoder`;
+  const uid = `${day}-${Math.random().toString(36).slice(2)}@documate`;
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Letter Decoder//EN",
+    "PRODID:-//DocuMate//EN",
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${stamp}`,

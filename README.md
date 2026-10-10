@@ -1,4 +1,4 @@
-# Letter Decoder
+# DocuMate
 
 Upload photos or PDFs of confusing official letters, one or several at once (Medicaid renewal, hospital bill, eviction notice, SNAP recertification, financial aid), and get a plain-language explanation: what it is, how urgent it is, the deadlines, 3–5 next steps, and who to call, including the phone numbers and emails printed in the letter. In English, Spanish, Mandarin, French, Hindi, Arabic (right to left), Tagalog and Russian, with read-aloud.
 
