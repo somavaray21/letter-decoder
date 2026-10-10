@@ -1,0 +1,27 @@
+{
+  "letterType": "medicaid",
+  "summary": "Es hora de renovar su seguro médico de Medicaid. Debe enviar el formulario de renovación y prueba de ingresos, o su seguro terminará.",
+  "urgency": "high",
+  "deadlines": [
+    {
+      "date": "2026-11-15",
+      "what": "Enviar el formulario de renovación y prueba de ingresos",
+      "sourceQuote": "Your completed renewal form and income documents must be received by November 15, 2026, or your coverage will end on November 30, 2026."
+    },
+    {
+      "date": "2026-11-30",
+      "what": "Su seguro termina si no reciben el formulario",
+      "sourceQuote": "Your completed renewal form and income documents must be received by November 15, 2026, or your coverage will end on November 30, 2026."
+    }
+  ],
+  "steps": [
+    "Llene el formulario de renovación que vino con esta carta.",
+    "Saque copias de sus últimos 4 talones de pago.",
+    "Envíe el formulario y las copias por correo, en línea o en persona.",
+    "Anote la fecha en que los envió.",
+    "Llame al número de la carta si tiene preguntas."
+  ],
+  "sender": "State Department of Health Services",
+  "confidence": "high",
+  "language": "es"
+}

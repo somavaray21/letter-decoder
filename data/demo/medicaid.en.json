@@ -1,0 +1,27 @@
+{
+  "letterType": "medicaid",
+  "summary": "It is time to renew your Medicaid health coverage. You must send back the renewal form and proof of income, or your coverage will end.",
+  "urgency": "high",
+  "deadlines": [
+    {
+      "date": "2026-11-15",
+      "what": "Send back your renewal form and proof of income",
+      "sourceQuote": "Your completed renewal form and income documents must be received by November 15, 2026, or your coverage will end on November 30, 2026."
+    },
+    {
+      "date": "2026-11-30",
+      "what": "Your coverage ends if the form is not received",
+      "sourceQuote": "Your completed renewal form and income documents must be received by November 15, 2026, or your coverage will end on November 30, 2026."
+    }
+  ],
+  "steps": [
+    "Fill out the renewal form that came with this letter.",
+    "Make copies of your last 4 pay stubs.",
+    "Mail the form and copies, or turn them in online or in person.",
+    "Write down the date you sent them.",
+    "Call the number on the letter if you have questions."
+  ],
+  "sender": "State Department of Health Services",
+  "confidence": "high",
+  "language": "en"
+}

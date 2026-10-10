@@ -1,0 +1,27 @@
+{
+  "letterType": "snap",
+  "summary": "Debe renovar sus beneficios de comida SNAP. Tiene que hacer una entrevista por teléfono y enviar prueba de sus ingresos y renta, o sus beneficios pararán.",
+  "urgency": "high",
+  "deadlines": [
+    {
+      "date": "2026-10-28",
+      "what": "Entrevista por teléfono con su trabajador de caso a las 10:00 AM",
+      "sourceQuote": "Your recertification interview is scheduled by telephone on October 28, 2026 at 10:00 AM."
+    },
+    {
+      "date": "2026-10-31",
+      "what": "Enviar prueba de ingresos y renta",
+      "sourceQuote": "Verification documents must be returned by October 31, 2026, or your benefits will end."
+    }
+  ],
+  "steps": [
+    "Anote la fecha y hora de la entrevista en su teléfono.",
+    "Tenga su teléfono prendido y cargado esa mañana.",
+    "Junte sus talones de pago y su contrato o recibo de renta.",
+    "Envíe copias de estos papeles antes de la fecha límite.",
+    "Si pierde la llamada, llame a su oficina de SNAP el mismo día."
+  ],
+  "sender": "County Department of Social Services",
+  "confidence": "high",
+  "language": "es"
+}

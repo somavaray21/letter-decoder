@@ -1,0 +1,21 @@
+{
+  "letterType": "financial_aid",
+  "summary": "Su universidad necesita más papeles para terminar su ayuda financiera. Hasta que los envíe, no recibirá el dinero de su beca para el próximo semestre.",
+  "urgency": "medium",
+  "deadlines": [
+    {
+      "date": "2026-12-01",
+      "what": "Enviar la hoja de verificación y la transcripción de impuestos",
+      "sourceQuote": "Please submit the Verification Worksheet and an IRS Tax Return Transcript no later than December 1, 2026."
+    }
+  ],
+  "steps": [
+    "Entre a su portal de estudiante y baje la hoja de verificación.",
+    "Pida gratis su transcripción de impuestos en el sitio web del IRS.",
+    "Suba los dos papeles a la oficina de ayuda financiera.",
+    "Pida a la oficina que confirme que los recibió."
+  ],
+  "sender": "Lakeside Community College Office of Financial Aid",
+  "confidence": "high",
+  "language": "es"
+}
